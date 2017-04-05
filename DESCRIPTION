@@ -1,0 +1,20 @@
+Package: ShinyBasicAuth
+Title: ShinyBasicAuth adds simple authentifcation to a shiny app, via a MySQL db table of users
+Version: 0.0.0.9000
+Authors@R: person("Tim", "Jones", email = "timothy.jones1@amey.co.uk", role = c("aut", "cre"))
+Description: This package adds authentication, and simple user management tools to Shinydashboard.   It requires a MySQL database of users with user ids and hashed passwords.  This package is still very much in development and lacks critical features such as the ability to add users. 
+Depends: R (>= 3.3.3)
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+  bcrypt (>= 0.2),
+	data.table (>= 1.10.4),
+  DBI (>= 0.5-1),
+  magrittr (>= 1.5),
+  shiny (>= 1.0.1),
+  shinydashboard (>= 0.5.3),
+  sodium (>= 1.1)
+Suggests:
+	pool (>= 0.1.0)
+RoxygenNote: 6.0.1
