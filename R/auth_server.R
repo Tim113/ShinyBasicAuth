@@ -6,18 +6,20 @@
 #' @import magrittr
 #' @export
 auth_server = function(con,
-                               logged_on_server,
-                               user_id_col_name,
-                               password_col_name,
-                               user_table) {
+                       logged_on_server,
+                       user_id_col,
+                       password_col,
+                       admin_col,
+                       date_created_col,
+                       date_password_changed,
+                       user_table) {
 
   # Make regular shiny server
   shiny::shinyServer(function(input, output, session) {
 
-
     ### Create the sidebar, with no-user logged in
-    sheppy_auth_sidebar(input, output, session,
-                        status = "start")
+    auth_sidebar(input, output, session,
+                 status = "start")
 
     ###### When logon is pressed
     shiny::observeEvent(input$login, {
@@ -26,30 +28,47 @@ auth_server = function(con,
       # if not it will return null
 
       # loggedin_user_id shoudl be treated as the sacrosanct identifyer of the logged in user
-      loggedin_user_id = sheppey_auth(input, output, session, con,
-                                      user_id_col_name,
-                                      password_col_name,
-                                      user_table)
+      loggedin_user_id = auth_check(input, output, session, con,
+                                    user_id_col,
+                                    password_col,
+                                    user_table)
 
       # Get the username used to check the loginstatus via
       inputed_user = input$user
 
       # Rest the password field, this is not a good solution to this problem
-      sheppy_auth_sidebar(
+      auth_sidebar(
         input, output, session,
         status       = "start")
 
       # Check to see if the autentifaction was sucessfull
       if (is.null(loggedin_user_id)) {
         ###  The password is incorrect show an error
-        sheppy_auth_sidebar(
+        auth_sidebar(
           input, output, session,
           status = "failed")
         return()
       } else if (inputed_user == loggedin_user_id) {
 
+        # Create auth object to pass to logged_on_server
+        auth = list(
+          con                   = con,
+          user_id               = loggedin_user_id,
+          user_table            = user_table,
+          user_id           = user_id_col,
+          password          = password_col,
+          admin             = admin_col,
+          date_created          = date_created_col,
+          date_password_changed = date_password_changed
+        )
+
+        # Create the sidebar
+        auth_sidebar(
+          input, output, session,
+          status = "logged-in")
+
         ### Run the server code
-        logged_on_server(input, output, session, con, loggedin_user_id)
+        logged_on_server(input, output, session, auth)
 
 
       } else {

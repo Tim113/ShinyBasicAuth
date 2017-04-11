@@ -6,8 +6,7 @@
 The UI shown depends on if this is for the logged inuser or an admin
 changeing the passowrd of anothe user}
 \usage{
-password_change_modal(input, output, session, acting_as_admin, user_id,
-  time_stamp)
+password_change_modal(input, output, session, admin, user_id, time_stamp)
 }
 \arguments{
 \item{time_stamp}{Creates a uniqe box each time the box is opends}

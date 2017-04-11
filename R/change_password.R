@@ -2,30 +2,39 @@
 #' allos the user to change there password.  Or an andmin to change the user passwords for
 #' any user.
 #'
-#' @param acting_as_admin Is true if this is an admin changin the datils for another user
+#' @param admin Is true if this is an admin changin the datils for another user
 #'
 #' @export
-change_manager = function(input, output, session, con,
-                                   user_id_col_name,
-                                   password_col_name,
-                                   # last_pwd_change_col_name,
-                                   user_tabe,
-                                   acting_as_admin = FALSE,
-                                   user_id,
-                                   old_password){
+password_change_manager = function(input, output, session, auth,
+                                   admin = FALSE,
+                                   user_id = NULL,
+                                   old_password = NULL){
+  # If user_id has not been given then take it form auth object
+  user_id = auth$user_id
+
+  # If not acting as admin then there must be an old_password
+  if (!admin & is.null(old_password)) {
+    stop("If not acting as admin then users old password must be given.")
+  }
+
+  # Create time stamp for this instance
   time_stamp = Sys.time() %>%
     gsub('[[:punct:], [:space:]]', '', .)
 
   # Make the password modal
   password_modal = password_change_modal(input, output, session,
-                                         acting_as_admin,
+                                         admin,
                                          user_id,
                                          time_stamp)
 
   # Show the modal containg password change options
   shiny::showModal(password_modal)
 
-  # Listen for the password change button
+  ################ listen for password buttons
+  # There are two diffrent password modals that can be shown depening on the context
+  # that this funcition is called from, they are disigised via the button id they use
+  # for saving
+  ### Listen for the password change button
   shiny::observeEvent(
     eventExpr = input[[paste0("check_and_change_password", time_stamp)]],
     handlerExpr = {
@@ -39,13 +48,16 @@ change_manager = function(input, output, session, con,
       new_passwords_match =
         input$new_password_main == input$new_password_confirm
 
-      if (old_password_correct & new_passwords_match & input$password_change_confirm) {
+      # New password vaild
+      # // TODO Check htr password is storng
+      password_strong_enough = TRUE
+
+      if (old_password_correct &
+          new_passwords_match &
+          input$password_change_confirm &
+          password_strong_enough) {
         # Save the new password to the db
-        save_new_password(session, con,
-                          user_id_col_name,
-                          password_col_name,
-                          # last_pwd_change_col_name,
-                          user_tabe,
+        save_new_password(session, auth,
                           user_id,
                           sodium::password_store(input$new_password_main))
 
@@ -54,7 +66,7 @@ change_manager = function(input, output, session, con,
 
         # Remake the modal to remove the passwords from memory
         password_modal = password_change_modal(input, output, session,
-                                               acting_as_admin,
+                                               admin,
                                                user_id,
                                                time_stamp)
         gc()
@@ -77,7 +89,7 @@ change_manager = function(input, output, session, con,
     })
 
 
-  # Listen for the password reset button
+  ### Listen for the password reset button
   shiny::observeEvent(
     eventExpr = input[[paste0("reset_password", time_stamp)]],
     handlerExpr = {
@@ -85,10 +97,7 @@ change_manager = function(input, output, session, con,
       # Check that the coconformfurm password change box has been ticked
       if (input$password_change_confirm) {
         # Save the new password to the db
-        save_new_password(session, con,
-                          user_id_col_name,
-                          password_col_name,
-                          user_tabe,
+        save_new_password(session, auth,
                           user_id,
                           sodium::password_store(input$new_password_main))
 
@@ -97,7 +106,7 @@ change_manager = function(input, output, session, con,
 
         # Remake the modal to remove the passwords from memory
         password_modal = password_change_modal(input, output, session,
-                                               acting_as_admin,
+                                               admin,
                                                user_id,
                                                time_stamp)
         gc()
@@ -111,37 +120,30 @@ change_manager = function(input, output, session, con,
 }
 
 #' Save a new password to the db
-save_new_password = function(session, con,
-                             user_id_col_name,
-                             password_col_name,
-                             # last_pwd_change_col_name,
-                             user_tabe,
+save_new_password = function(session, auth,
                              user_id,
                              new_hased_password) {
 
   sql_update_password =
     paste0(
       "UPDATE ",
-      user_tabe,
+      auth$user_table,
       " SET ",
-      password_col_name,
-      " = ?hashed_password ", #, ",
-      # last_pwd_change_col_name,
-      # " = ?last_pwd_change   ",
+      auth$password,
+      " = ?hashed_password, ",
+      auth$date_password_changed,
+      " = NOW() ",
       " WHERE ",
-      user_id_col_name,
+      auth$user_id,
       " = ?user_id;"
     )
 
   query_update_password =
-    DBI::sqlInterpolate(con, sql_update_password,
+    DBI::sqlInterpolate(auth$con, sql_update_password,
                         hashed_password     = new_hased_password,
-                        # last_pwd_change     = Sys.time(),
-                        user_id             = user_id)
+                        user_id             = auth$user_id)
 
-  print(query_update_password)
-
-  DBI::dbGetQuery(con, query_update_password)
+  DBI::dbGetQuery(auth$con, query_update_password)
 
   # Let the user know the password has been saved to the db
   session$sendCustomMessage(
@@ -157,17 +159,18 @@ save_new_password = function(session, con,
 #'
 #' @import data.table
 password_change_modal = function(input, output, session,
-                                 acting_as_admin,
+                                 admin,
                                  user_id,
                                  time_stamp){
 
   # Check to see if this is a password change for the current user
-  if (!acting_as_admin) {
+  if (!admin) {
 
     #  The user to change the password is the active user
     shiny::modalDialog(
       title     = "Change Password",
       size      = "s",
+      fade      = FALSE,
       footer    = shiny::tagList(
         shiny::actionButton(inputId =
                               paste0("check_and_change_password",
@@ -207,6 +210,7 @@ password_change_modal = function(input, output, session,
     shiny::modalDialog(
       title     = "Reset Password",
       size      = "s",
+      fade      = FALSE,
       footer    = shiny::tagList(
         shiny::actionButton(inputId =
                               paste0("reset_password",

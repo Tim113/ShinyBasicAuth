@@ -6,8 +6,7 @@
 #'
 #' @import data.table
 #' @import magrittr
-auth_sidebar = function(input, output, session,
-                               status){
+auth_sidebar = function(input, output, session, status){
   #################### Explanation
   # There are three possible states for the sidebar
   # 1. No-login attempt ("start")
@@ -26,7 +25,7 @@ auth_sidebar = function(input, output, session,
   # If status is start show the logon sidebar
   if (status == "start") {
     ## Render the Sidbar Meneu
-    output$sidebar = shiny::renderUI({
+    output$auth_sidebar = shiny::renderUI({
       # The inital sidebar menue
       shinydashboard::sidebarMenu(
         ### Login to the app
@@ -54,7 +53,7 @@ auth_sidebar = function(input, output, session,
     user_id = input$user
 
     # Render
-    output$sidebar = shiny::renderUI({
+    output$auth_sidebar = shiny::renderUI({
       # The inital sidebar menue
       shinydashboard::sidebarMenu(
         ### Login to the app
@@ -83,6 +82,19 @@ auth_sidebar = function(input, output, session,
     return()
 
   } else if (status == "logged-in") {
+
+    output$auth_sidebar = shiny::renderUI({
+      shinydashboard::sidebarMenu(
+
+        # id = "auth_tabs",
+        #
+        # shinydashboard::menuItem(text     = "Settings",
+        #                          tabName  = "settings"),
+        #
+        # shinydashboard::menuItem(text     = "Admin",
+        #                          tabName  = "admin")
+      )
+    })
 
     # Exit the function
     return()

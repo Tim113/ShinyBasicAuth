@@ -4,10 +4,10 @@
 #' @import data.table
 #' @import magrittr
 #' @export
-auth_checks = function(input, output, session, con,
-                        user_id_col_name,
-                        password_col_name,
-                        user_tabel){
+auth_check = function(input, output, session, con,
+                      user_id_col_name,
+                      password_col_name,
+                      user_tabel){
 
   # Only run if there are valid emplyee_ids and password
   shiny::req(
