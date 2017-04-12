@@ -129,12 +129,12 @@ save_new_password = function(session, auth,
       "UPDATE ",
       auth$user_table,
       " SET ",
-      auth$password,
+      auth$password_col,
       " = ?hashed_password, ",
-      auth$date_password_changed,
+      auth$date_password_changed_col,
       " = NOW() ",
       " WHERE ",
-      auth$user_id,
+      auth$user_id_col,
       " = ?user_id;"
     )
 

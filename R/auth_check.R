@@ -4,10 +4,7 @@
 #' @import data.table
 #' @import magrittr
 #' @export
-auth_check = function(input, output, session, con,
-                      user_id_col_name,
-                      password_col_name,
-                      user_tabel){
+auth_check = function(input, output, session, auth) {
 
   # Only run if there are valid emplyee_ids and password
   shiny::req(
@@ -28,19 +25,19 @@ auth_check = function(input, output, session, con,
 
   # Create interpolated quirey to prevent sql injection
   sql_hashed_password   = paste0("SELECT ",
-                                 password_col_name,
+                                 auth$password_col,
                                  " FROM ",
-                                 user_tabel ,
+                                 auth$user_table ,
                                  " WHERE ",
-                                 user_id_col_name,
+                                 auth$user_id_col,
                                  " = ?id1;")
 
-  query_hashed_password = DBI::sqlInterpolate(con, sql_hashed_password,
+  query_hashed_password = DBI::sqlInterpolate(auth$con, sql_hashed_password,
                                               id1 = given_user_id)
 
   # Retreve the query from the db
   hashed_password =
-    DBI::dbGetQuery(con, query_hashed_password) %>%
+    DBI::dbGetQuery(auth$con, query_hashed_password) %>%
     as.character()
 
   ### Check the given_user_id

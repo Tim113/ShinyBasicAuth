@@ -11,7 +11,7 @@ auth_server = function(con,
                        password_col,
                        admin_col,
                        date_created_col,
-                       date_password_changed,
+                       date_password_changed_col,
                        user_table) {
 
   # Make regular shiny server
@@ -27,11 +27,20 @@ auth_server = function(con,
       # If there is a sucessfull logon then this will be a datatable of the users information
       # if not it will return null
 
+      # Create auth object to pass to logged_on_server
+      auth = list(
+        con                       = con,
+        user_id                   = NULL,
+        user_table                = user_table,
+        user_id_col               = user_id_col,
+        password_col              = password_col,
+        admin_col                 = admin_col,
+        date_created_col          = date_created_col,
+        date_password_changed_col = date_password_changed_col
+      )
+
       # loggedin_user_id shoudl be treated as the sacrosanct identifyer of the logged in user
-      loggedin_user_id = auth_check(input, output, session, con,
-                                    user_id_col,
-                                    password_col,
-                                    user_table)
+      loggedin_user_id = auth_check(input, output, session, auth)
 
       # Get the username used to check the loginstatus via
       inputed_user = input$user
@@ -50,17 +59,8 @@ auth_server = function(con,
         return()
       } else if (inputed_user == loggedin_user_id) {
 
-        # Create auth object to pass to logged_on_server
-        auth = list(
-          con                   = con,
-          user_id               = loggedin_user_id,
-          user_table            = user_table,
-          user_id           = user_id_col,
-          password          = password_col,
-          admin             = admin_col,
-          date_created          = date_created_col,
-          date_password_changed = date_password_changed
-        )
+        # Add uer_id to auth object
+        auth$user_id = loggedin_user_id
 
         # Create the sidebar
         auth_sidebar(

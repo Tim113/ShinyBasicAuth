@@ -72,13 +72,13 @@ save_new_user = function(input, output, session, auth) {
       "INSERT INTO ",
       auth$user_table,
       " (",
-      auth$user_id,
+      auth$user_id_col,
       ", ",
-      auth$password,
+      auth$password_col,
       ", ",
-      auth$admin,
+      auth$admin_col,
       ", ",
-      auth$date_created,
+      auth$date_created_col,
       ") VALUES ( ?user_id, ?password, ?admin, NOW());")
 
   query_create_user =
@@ -86,8 +86,6 @@ save_new_user = function(input, output, session, auth) {
                         user_id      = input$user_id,
                         password     = sodium::password_store(input$password),
                         admin        = as.numeric(input$make_admin))
-
-  print(query_create_user)
 
   DBI::dbGetQuery(auth$con, query_create_user)
 
@@ -157,7 +155,7 @@ get_curret_user_ids = function(auth) {
   # Build the Qury to send to the db
   query_users_table =
     paste0(
-      "SELECT ", auth$user_id, " FROM ", auth$user_table, ";"
+      "SELECT ", auth$user_id_col, " FROM ", auth$user_table, ";"
     )
 
   suppressWarnings({
