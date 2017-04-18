@@ -2,7 +2,9 @@
 
 export(auth_check)
 export(auth_server)
+export(create_auth_tables)
 export(password_change_manager)
+export(settings_tab)
 export(user_creation_manager)
 import(data.table)
 import(magrittr)

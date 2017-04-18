@@ -4,11 +4,14 @@
 \alias{auth_server}
 \title{Manage the logon, and the changes of the UI based upon}
 \usage{
-auth_server(con, logged_on_server, user_id_col_name, password_col_name,
-  user_table)
+auth_server(con, server, config_path)
 }
 \arguments{
 \item{con}{Database connection or pool}
+
+\item{server}{Shiny Server function to run when a user is logged on, must take aut as argument}
+
+\item{auth_config}{File path to auth_config file}
 }
 \description{
 Manage the logon, and the changes of the UI based upon

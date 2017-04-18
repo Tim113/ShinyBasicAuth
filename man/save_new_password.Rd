@@ -4,7 +4,7 @@
 \alias{save_new_password}
 \title{Save a new password to the db}
 \usage{
-save_new_password(session, auth, user_id, new_hased_password)
+save_new_password(session, auth, user_id, new_password)
 }
 \description{
 Save a new password to the db

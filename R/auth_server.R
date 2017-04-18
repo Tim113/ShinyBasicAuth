@@ -1,18 +1,15 @@
 #' Manage the logon, and the changes of the UI based upon
 #'
 #' @param con Database connection or pool
+#' @param server Shiny Server function to run when a user is logged on, must take aut as argument
+#' @param auth_config File path to auth_config file
 #'
 #' @import data.table
 #' @import magrittr
 #' @export
 auth_server = function(con,
-                       logged_on_server,
-                       user_id_col,
-                       password_col,
-                       admin_col,
-                       date_created_col,
-                       date_password_changed_col,
-                       user_table) {
+                       server,
+                       config_path) {
 
   # Make regular shiny server
   shiny::shinyServer(function(input, output, session) {
@@ -28,16 +25,7 @@ auth_server = function(con,
       # if not it will return null
 
       # Create auth object to pass to logged_on_server
-      auth = list(
-        con                       = con,
-        user_id                   = NULL,
-        user_table                = user_table,
-        user_id_col               = user_id_col,
-        password_col              = password_col,
-        admin_col                 = admin_col,
-        date_created_col          = date_created_col,
-        date_password_changed_col = date_password_changed_col
-      )
+      auth = make_auth_object(con, config_path)
 
       # loggedin_user_id shoudl be treated as the sacrosanct identifyer of the logged in user
       loggedin_user_id = auth_check(input, output, session, auth)
@@ -62,13 +50,19 @@ auth_server = function(con,
         # Add uer_id to auth object
         auth$user_id = loggedin_user_id
 
+        # Get the user from the db
+        auth$dt_user = get_dt_user(auth)
+
         # Create the sidebar
         auth_sidebar(
           input, output, session,
           status = "logged-in")
 
+        ### Render the settings tab
+        ShinyBasicAuth::settings_tab(input, output, session, auth)
+
         ### Run the server code
-        logged_on_server(input, output, session, auth)
+        server(input, output, session, auth)
 
 
       } else {
@@ -88,4 +82,28 @@ auth_server = function(con,
     #   output$body = shiny::h
     # })
   })
+}
+
+
+get_dt_user = function(auth) {
+  # The password is correct so get the rest of the user information from the db
+  # and return it to the calling funciton
+  sql_user_info   = paste0("SELECT * FROM Users WHERE user_id = ?user_id;")
+  query_user_info = DBI::sqlInterpolate(auth$con, sql_user_info ,
+                                        user_id = auth$user_id)
+
+  # Retreve the query from the db
+  suppressWarnings({
+    dt_user =
+      DBI::dbGetQuery(auth$con, query_user_info) %>%
+      data.table::setDT(.)
+  })
+
+  # Make the admin column logical
+  dt_user = dt_user[, admin := as.logical(admin)]
+
+  # Make the moderator column logical
+  dt_user = dt_user[, moderator := as.logical(moderator)]
+
+  return(dt_user)
 }

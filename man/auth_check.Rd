@@ -5,8 +5,7 @@
 \title{Check the username and password given in input$user and input$password respectivly in the current namespace
 If the credentuals are correct return the user information}
 \usage{
-auth_check(input, output, session, con, user_id_col_name, password_col_name,
-  user_tabel)
+auth_check(input, output, session, auth)
 }
 \description{
 Check the username and password given in input$user and input$password respectivly in the current namespace
