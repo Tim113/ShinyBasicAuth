@@ -67,11 +67,20 @@ user_creation_manager = function(input, output, session, auth){
 #' Save a new password to the db
 save_new_user = function(input, output, session, auth) {
 
-  sql_create_user =
-    paste0(
-      "INSERT INTO Users",
-      " ( user_id, password, admin, last_password_change) ",
-      " VALUES ( ?user_id, ?password, ?admin, NOW());")
+  # All users defult to not being moderators if moderators exist
+  if (auth$table_cofig$moderator$use_moderatior) {
+    sql_create_user =
+      paste0(
+        "INSERT INTO Users",
+        " ( user_id, password, admin, moderator, last_password_change) ",
+        " VALUES ( ?user_id, ?password, ?admin, '0', NOW());")
+  } else {
+    sql_create_user =
+      paste0(
+        "INSERT INTO Users",
+        " ( user_id, password, admin, last_password_change) ",
+        " VALUES ( ?user_id, ?password, ?admin, NOW());")
+  }
 
   query_create_user =
     DBI::sqlInterpolate(auth$con, sql_create_user,

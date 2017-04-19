@@ -59,7 +59,10 @@ auth_server = function(con,
           status = "logged-in")
 
         ### Render the settings tab
-        ShinyBasicAuth::settings_tab(input, output, session, auth)
+        settings_tab(input, output, session, auth)
+
+        ### Render the admin tab
+        admin_tab(input, output, session, auth)
 
         ### Run the server code
         server(input, output, session, auth)

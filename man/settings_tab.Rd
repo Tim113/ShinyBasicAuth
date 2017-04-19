@@ -5,12 +5,9 @@
 \title{Create the settings tab
 This function needs to be able to trigger the fech of a new dt_user}
 \usage{
-settings_tab(input, output, session, auth, dt_settings_user = NULL)
+settings_tab(input, output, session, auth, permissions = "user")
 }
 \arguments{
-\item{dt_settings_user}{Data table for the user for which to show settings
-only valid on the admin or lm page}
-
 \item{dt_user}{Data table identifying the current user}
 }
 \description{

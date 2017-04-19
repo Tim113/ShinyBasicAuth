@@ -1,5 +1,3 @@
-auth_config = yaml::yaml.load_file("/media/sf_Documents/FA Tool/ShinyBasicAuth/.auth_config.yaml")
-
 #' Function to create tables for ShinyBasicAuth, this funciton will also chec that the
 #' auth.config.yaml file contanis the requite information
 #'

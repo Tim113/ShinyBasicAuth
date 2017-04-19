@@ -16,3 +16,5 @@ make_auth_object = function(con, config_path) {
 
   return(auth)
 }
+
+auth_config = yaml::yaml.load_file("/media/sf_Documents/FA Tool/ShinyBasicAuth/.auth_config.yaml")

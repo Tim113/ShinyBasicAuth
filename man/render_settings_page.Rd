@@ -4,7 +4,10 @@
 \alias{render_settings_page}
 \title{Function creating the ui for a settings page for a given user table}
 \usage{
-render_settings_page(input, output, session, auth, dt_settings_user)
+render_settings_page(input, output, session, auth, changeable_columns)
+}
+\arguments{
+\item{permissions}{The level of permision the accessing user has}
 }
 \description{
 Function creating the ui for a settings page for a given user table

@@ -4,7 +4,8 @@
 #' @param dt_user Data table identifying the current user
 #'
 #' @export
-settings_tab = function(input, output, session, auth){
+settings_tab = function(input, output, session, auth, permissions = "user"){
+
   ### Render the summary page
   # This must be reset then the "reset" button is pressed
   shiny::observeEvent(
@@ -12,14 +13,14 @@ settings_tab = function(input, output, session, auth){
     ignoreNULL  = FALSE,
     handlerExpr = {
       output$settings = render_settings_page(input, output, session, auth,
-                                             permissions = "user")
+                                             permissions)
     })
 
   ### Save changes to the users details
   shiny::observeEvent(
     eventExpr   = input$save,
     handlerExpr = {
-      save_user_details(input, output, session, auth, permissions = "user")
+      save_user_details(input, output, session, auth, permissions)
     })
 
   ### Change password
@@ -37,22 +38,32 @@ settings_tab = function(input, output, session, auth){
 }
 
 #' Save the current user datailes to the db
-save_user_details = function(input, output, session, auth, permissions = "user"){
+#'
+#' @param dt_user data.table of user for whom the settings page is opened, defult so acitve user
+#'
+#' @import data.table
+save_user_details = function(input, output, session, auth,
+                             permissions, dt_user = NULL){
+  # Defult dt_user to auth$dt_user
+  if (is.null(dt_user)) {dt_user = auth$dt_user}
 
+  ### Get list of valid chagable verables
   # Find all of the rows that are spesificly user changable
   if (permissions == "admin") {
     cond = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$admin_changeable))
+  } else if (permissions == "moderator") {
+    cond = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$moderator_changeable))
   } else {
     cond = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$user_changeable))
   }
 
-  # Extract just the user chanable columns
-  user_changeable_columns = setdiff(
+  # Extract just the chanable columns, excluding those changed via other means
+  changeable_columns = setdiff(
     x = names(auth$table_cofig[cond]),
-    y = c("password", "admin", "moderator"))
+    y = c("password", "admin"))
 
   # // TODO change this to something less awfull
-  for (col_name in user_changeable_columns) {
+  for (col_name in changeable_columns) {
     # Make nice injection proof queury
     sql_save_user_details =
       paste0(
@@ -65,7 +76,7 @@ save_user_details = function(input, output, session, auth, permissions = "user")
     query_save_user_details =
       DBI::sqlInterpolate(auth$con, sql_save_user_details,
                           value   = input[[col_name]],
-                          user_id = auth$dt_user[, user_id])
+                          user_id = dt_user[, user_id])
 
     # Send the qeruy
     DBI::dbGetQuery(auth$con, query_save_user_details)
@@ -81,73 +92,142 @@ save_user_details = function(input, output, session, auth, permissions = "user")
 #' Function creating the ui for a settings page for a given user table
 #'
 #' @param permissions The level of permision the accessing user has
+#' @param dt_user data.table of user for whom the settings page is opened, defult so acitve user
 #'
 #' @import data.table
 render_settings_page = function(input, output, session, auth,
-                                permissions = "user"){
-  ns = session$ns
+                                permissions, dt_user = NULL,
+                                time_stamp = NULL){
 
+  # Defult dt_user to auth$dt_user
+  if (is.null(dt_user)) {dt_user = auth$dt_user}
+
+  ### Get list of valid chagable verables
   # Find all of the rows that are spesificly user changable
   if (permissions == "admin") {
     cond = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$admin_changeable))
+  } else if (permissions == "moderator") {
+    cond = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$moderator_changeable))
   } else {
     cond = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$user_changeable))
   }
 
-  # Extract just the user chanable columns
-  user_changeable_columns = setdiff(
+  # Extract just the chanable columns, excluding those changed via other means
+  changeable_columns = setdiff(
     x = names(auth$table_cofig[cond]),
-    y = c("password", "admin", "moderator"))
+    y = c("password", "admin"))
 
-  shiny::renderUI({
-    shiny::conditionalPanel(
-      condition = "input.navtabs == 'settings'",
+  ns = session$ns
 
-      shiny::fluidPage(
-
+  ### Render the ui
+  # This will be diffrent dependent on if it is called by settings or admin
+  if (permissions == "admin") {
+    ui = shiny::renderUI({
+      shiny::tagList(
         page_tile("Settings"),
 
         # Verable boxes
         shiny::fluidRow(
           lapply(
-            X = user_changeable_columns,
+            X = changeable_columns,
             FUN     = render_settings_box,
             input   = input,
             output  = output,
             session = session,
-            auth    = auth)),
+            auth    = auth,
+            dt_user = dt_user)),
 
         shiny::fluidRow(
-          shinydashboard::box(width = 4,
-                              shiny::actionButton(
-                                inputId = ns("password_change"),
-                                label   = "Change Password",
-                                width   = "100%"
-                              )),
-          shinydashboard::box(width = 4,
-                              shiny::actionButton(
-                                inputId = ns("save"),
-                                label   = "Save Changes",
-                                width   = "100%"
-                              )),
-          shinydashboard::box(width = 4,
-                              shiny::actionButton(
-                                inputId = ns("reset"),
-                                label   = "Reset",
-                                width   = "100%"
-                              ))
+          shinydashboard::box(
+            width       = 12,
+            collapsible = TRUE,
+            collapsed   = TRUE,
+            title = "Grant and Revoke Admin Rights",
+
+            shiny::checkboxInput(
+              inputId = ns("is_admin"),
+              label   = "User is Admin",
+              value   = dt_user[, admin]),
+            shiny::HTML("<p> <br/> </p>"),
+
+            paste0("To make sure that you want to do this please type in to the box the users ",
+                   auth$table_cofig$user_id$human_name,
+                   "."),
+            shiny::HTML("<p> <br/> </p>"),
+
+            shiny::textInput(
+              inputId = ns("confirm_text"),
+              label   = NULL,
+              width   = "200px"),
+            shiny::HTML("<p> <br/> </p>"),
+
+            shiny::checkboxInput(
+              inputId = ns("confirm_box"),
+              label   = "Confirm Status Change"),
+            shiny::HTML("<p> <br/> </p>"),
+
+            shiny::actionButton(
+              inputId = ns(paste0("change_admin_status",
+                                  time_stamp)),
+              label   = "Change Admin Status")
+          )
         )
+
+        )
+      })
+  } else {
+    ui = shiny::renderUI({
+      shiny::conditionalPanel(
+        condition = "input.navtabs == 'settings'",
+
+        shiny::fluidPage(
+
+          page_tile("Settings"),
+
+          # Verable boxes
+          shiny::fluidRow(
+            lapply(
+              X = changeable_columns,
+              FUN     = render_settings_box,
+              input   = input,
+              output  = output,
+              session = session,
+              auth    = auth,
+              dt_user = dt_user)),
+
+          shiny::fluidRow(
+            shinydashboard::box(width = 4,
+                                shiny::actionButton(
+                                  inputId = ns("password_change"),
+                                  label   = "Change Password",
+                                  width   = "100%"
+                                )),
+            shinydashboard::box(width = 4,
+                                shiny::actionButton(
+                                  inputId = ns("save"),
+                                  label   = "Save Changes",
+                                  width   = "100%"
+                                )),
+            shinydashboard::box(width = 4,
+                                shiny::actionButton(
+                                  inputId = ns("reset"),
+                                  label   = "Reset",
+                                  width   = "100%"
+                                ))
+          )
 
         ))
     })
+  }
 
+  return(ui)
 }
 
 
 
 #' @import data.table
 render_settings_box = function(input, output, session, auth,
-                               column_name) {
+                               column_name, dt_user) {
 
   ns = session$ns
 
@@ -161,20 +241,22 @@ render_settings_box = function(input, output, session, auth,
                              shiny::checkboxInput(
                                inputId = ns(column_name),
                                label   = NULL,
-                               value   = as.logical(auth$dt_user[, ..column_name])
+                               value   = as.logical(dt_user[, ..column_name])
                                ))
 
   } else if (column_name %in% c("users_moderator")) {
     # Get list of moderators
-    moderators_list = c(1, 2, 3)
+    moderators_list = DBI::dbGetQuery(
+      conn      = auth$con,
+      statement = "SELECT user_id FROM Users WHERE moderator = '1';")
 
     ui = shinydashboard::box(width = 4,
                              title = auth$table_cofig[[column_name]]$human_name,
                              shiny::selectInput(
                                inputId  = ns(column_name),
                                label    = NULL,
-                               choices  = moderators_list,
-                               selected = auth$dt_user[, ..column_name]))
+                               choices  = moderators_list[, "user_id"],
+                               selected = dt_user[, ..column_name]))
 
   } else if (type %in% c("character", "intiger", "decimal")) {
     ui = shinydashboard::box(width = 4,
@@ -182,7 +264,7 @@ render_settings_box = function(input, output, session, auth,
                              shiny::textInput(
                                inputId = ns(column_name),
                                label   = NULL,
-                               value   = auth$dt_user[, ..column_name]))
+                               value   = dt_user[, ..column_name]))
 
   } else if (type == "logical") {
     ui = shinydashboard::box(width = 4,
@@ -190,7 +272,7 @@ render_settings_box = function(input, output, session, auth,
                              shiny::checkboxInput(
                                inputId = ns(column_name),
                                label   = NULL,
-                               value   = auth$dt_user[, ..column_name]))
+                               value   = dt_user[, ..column_name]))
 
   } else if (type == "categorical") {
     # Get the catagorys from auth
@@ -202,7 +284,7 @@ render_settings_box = function(input, output, session, auth,
                                inputId  = ns(column_name),
                                label    = NULL,
                                choices  = catagorys,
-                               selected = auth$dt_user[, ..column_name]))
+                               selected = dt_user[, ..column_name]))
   } else {
     stop("The coloumn ", column_name, " is said to to be of type ", type,
          ".  This is not a valid column type.")
