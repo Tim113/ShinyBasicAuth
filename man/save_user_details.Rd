@@ -4,7 +4,10 @@
 \alias{save_user_details}
 \title{Save the current user datailes to the db}
 \usage{
-save_user_details(input, output, session, auth, changeable_columns)
+save_user_details(input, output, session, auth, permissions, dt_user = NULL)
+}
+\arguments{
+\item{dt_user}{data.table of user for whom the settings page is opened, defult so acitve user}
 }
 \description{
 Save the current user datailes to the db
