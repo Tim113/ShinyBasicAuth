@@ -151,7 +151,7 @@ create_auth_tables = function(auth_config) {
     } else if (auth_config$table_cofig[[col_name]]$type == "catagorical") {
 
       # Check that the leves of the catagorcial verable have been set
-      if (is.null(auth_config$table_cofig[[col_name]]$categories)) {
+      if (is.null(auth_config$table_cofig[[col_name]]$categorical)) {
         stop(paste0(
           "There are no categories set in the config file for column: ",
           col_name,
@@ -161,6 +161,11 @@ create_auth_tables = function(auth_config) {
         model_Users[, (col_name) := character()]
       }
 
+    } else {
+      # If we are here then the given column type is not valid so return an erro
+      stop("The given type of column ", col_name, " is ",
+           auth_config$table_cofig[[col_name]]$type,
+           ".  This is not a valid column type please reffer back to the documentation.")
     }
   }
 
@@ -198,6 +203,24 @@ create_auth_tables = function(auth_config) {
 
   # Set as admin
   dt_first_user[, admin := 1]
+
+  # If using moderators, set the user as not a modorator
+  if (auth_config$table_cofig$moderator$use_moderatior) {
+    dt_first_user[, moderatior := 1]
+  }
+
+  # Defult all logical columns to false
+  cond = sapply(auth_config$table_cofig, function(x) {
+    shiny::isTruthy(x$type == "categorical")})
+
+  # Extract just the chanable columns, excluding those changed via other means
+  logical_cols = setdiff(
+    x = names(auth_config$table_cofig[cond]),
+    y = c("moderator", "admin"))
+
+  for (col_name in logical_cols) {
+    dt_first_user[, (col_name) := 1]
+  }
 
   dbUpdateTable::dbUpdateTable(con = con, name = "Users", dt = dt_first_user)
 

@@ -72,14 +72,14 @@ save_new_user = function(input, output, session, auth) {
     sql_create_user =
       paste0(
         "INSERT INTO Users",
-        " ( user_id, password, admin, moderator, last_password_change) ",
-        " VALUES ( ?user_id, ?password, ?admin, '0', NOW());")
+        " ( user_id, password, admin, moderator, date_created, last_password_change) ",
+        " VALUES ( ?user_id, ?password, ?admin, '0', NOW(), NOW());")
   } else {
     sql_create_user =
       paste0(
         "INSERT INTO Users",
-        " ( user_id, password, admin, last_password_change) ",
-        " VALUES ( ?user_id, ?password, ?admin, NOW());")
+        " ( user_id, password, admin, date_created, last_password_change) ",
+        " VALUES ( ?user_id, ?password, ?admin, NOW(), NOW());")
   }
 
   query_create_user =
