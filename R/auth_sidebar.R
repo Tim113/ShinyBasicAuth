@@ -85,14 +85,14 @@ auth_sidebar = function(input, output, session, status){
 
     output$auth_sidebar = shiny::renderUI({
       shinydashboard::sidebarMenu(
-
-        # id = "auth_tabs",
-        #
-        # shinydashboard::menuItem(text     = "Settings",
-        #                          tabName  = "settings"),
-        #
-        # shinydashboard::menuItem(text     = "Admin",
-        #                          tabName  = "admin")
+#
+#         id = "auth_tabs",
+#
+#         shinydashboard::menuItem(text     = "Settings",
+#                                  tabName  = "settings"),
+#
+#         shinydashboard::menuItem(text     = "Admin",
+#                                  tabName  = "admin")
       )
     })
 

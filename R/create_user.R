@@ -67,19 +67,20 @@ user_creation_manager = function(input, output, session, auth){
 #' Save a new password to the db
 save_new_user = function(input, output, session, auth) {
 
-  sql_create_user =
-    paste0(
-      "INSERT INTO ",
-      auth$user_table,
-      " (",
-      auth$user_id_col,
-      ", ",
-      auth$password_col,
-      ", ",
-      auth$admin_col,
-      ", ",
-      auth$date_created_col,
-      ") VALUES ( ?user_id, ?password, ?admin, NOW());")
+  # All users defult to not being moderators if moderators exist
+  if (auth$table_cofig$moderator$use_moderatior) {
+    sql_create_user =
+      paste0(
+        "INSERT INTO Users",
+        " ( user_id, password, admin, moderator, last_password_change) ",
+        " VALUES ( ?user_id, ?password, ?admin, '0', NOW());")
+  } else {
+    sql_create_user =
+      paste0(
+        "INSERT INTO Users",
+        " ( user_id, password, admin, last_password_change) ",
+        " VALUES ( ?user_id, ?password, ?admin, NOW());")
+  }
 
   query_create_user =
     DBI::sqlInterpolate(auth$con, sql_create_user,
@@ -155,7 +156,7 @@ get_curret_user_ids = function(auth) {
   # Build the Qury to send to the db
   query_users_table =
     paste0(
-      "SELECT ", auth$user_id_col, " FROM ", auth$user_table, ";"
+      "SELECT user_id FROM Users;"
     )
 
   suppressWarnings({

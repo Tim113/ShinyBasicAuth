@@ -24,13 +24,10 @@ auth_check = function(input, output, session, auth) {
   # If the user exists then get there hased password
 
   # Create interpolated quirey to prevent sql injection
-  sql_hashed_password   = paste0("SELECT ",
-                                 auth$password_col,
-                                 " FROM ",
-                                 auth$user_table ,
+  sql_hashed_password   = paste0("SELECT password ",
+                                 " FROM Users " ,
                                  " WHERE ",
-                                 auth$user_id_col,
-                                 " = ?id1;")
+                                 " user_id = ?id1;")
 
   query_hashed_password = DBI::sqlInterpolate(auth$con, sql_hashed_password,
                                               id1 = given_user_id)

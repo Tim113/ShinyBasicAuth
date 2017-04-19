@@ -4,7 +4,7 @@
 \alias{create_user_modal}
 \title{User creation modal}
 \usage{
-create_user_modal(input, output, session)
+create_user_modal(input, output, session, time_stamp)
 }
 \arguments{
 \item{time_stamp}{Creates a uniqe box each time the box is opends}

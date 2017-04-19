@@ -6,8 +6,8 @@
 #'
 #' @export
 password_change_manager = function(input, output, session, auth,
-                                   admin = FALSE,
-                                   user_id = NULL,
+                                   admin        = FALSE,
+                                   user_id      = NULL,
                                    old_password = NULL){
   # If user_id has not been given then take it form auth object
   user_id = auth$user_id
@@ -94,6 +94,8 @@ password_change_manager = function(input, output, session, auth,
     eventExpr = input[[paste0("reset_password", time_stamp)]],
     handlerExpr = {
 
+
+
       # Check that the coconformfurm password change box has been ticked
       if (input$password_change_confirm) {
         # Save the new password to the db
@@ -101,15 +103,15 @@ password_change_manager = function(input, output, session, auth,
                           user_id,
                           sodium::password_store(input$new_password_main))
 
-        # Close the modal dialog box
-        shiny::removeModal()
-
         # Remake the modal to remove the passwords from memory
         password_modal = password_change_modal(input, output, session,
                                                admin,
                                                user_id,
                                                time_stamp)
         gc()
+
+        # Close the modal dialog box
+        shiny::removeModal()
       } else {
         ### Error message
         session$sendCustomMessage(
@@ -122,33 +124,29 @@ password_change_manager = function(input, output, session, auth,
 #' Save a new password to the db
 save_new_password = function(session, auth,
                              user_id,
-                             new_hased_password) {
+                             new_password) {
 
   sql_update_password =
     paste0(
-      "UPDATE ",
-      auth$user_table,
-      " SET ",
-      auth$password_col,
-      " = ?hashed_password, ",
-      auth$date_password_changed_col,
-      " = NOW() ",
+      "UPDATE Users",
+      " SET password = ?password, ",
+      " last_password_change = NOW() ",
       " WHERE ",
-      auth$user_id_col,
-      " = ?user_id;"
+      "user_id = ?user_id;"
     )
 
   query_update_password =
     DBI::sqlInterpolate(auth$con, sql_update_password,
-                        hashed_password     = new_hased_password,
-                        user_id             = auth$user_id)
+                        password = new_password,
+                        user_id  = auth$user_id)
 
-  DBI::dbGetQuery(auth$con, query_update_password)
+  DBI::dbGetQuery(auth$con, query_update_password)#
 
   # Let the user know the password has been saved to the db
   session$sendCustomMessage(
     type    = 'testmessage',
     message = "New password Saved")
+
 }
 
 #' Password Reset/Change modal ui box
@@ -176,7 +174,7 @@ password_change_modal = function(input, output, session,
                               paste0("check_and_change_password",
                                      time_stamp),
                             label   = "Change Password"),
-        shiny::modalButton("Cancel")
+        shiny::modalButton("Close")
       ),
 
       # Body of Modal Window
@@ -216,7 +214,7 @@ password_change_modal = function(input, output, session,
                               paste0("reset_password",
                                      time_stamp),
                             label   = "Reset Password"),
-        shiny::modalButton("Cancel")
+        shiny::modalButton("Close")
       ),
 
       # Body of Modal Window
