@@ -5,7 +5,7 @@
 \title{Function to create tables for ShinyBasicAuth, this funciton will also chec that the
 auth.config.yaml file contanis the requite information}
 \usage{
-create_auth_tables(auth_config)
+create_auth_tables(auth_config_path)
 }
 \description{
 Function to create tables for ShinyBasicAuth, this funciton will also chec that the

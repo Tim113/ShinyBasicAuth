@@ -1,7 +1,5 @@
 #' Create the sidbar for the dashboard, diffrent dependent upon the status of the app
 #'
-#' @param tabs Which of the tabs should be shown, if left it defults to NULL showing all possible tabs
-#' @param competencies The list containg detals of all of the possible tabs
 #' @param status What is the status of the app and as such which of the sidebars should be shown
 #'
 #' @import data.table
@@ -18,7 +16,7 @@ auth_sidebar = function(input, output, session, status){
 
   # Insure that staus is on of the valid statu's for the list
   if (!(status %in% c("start", "logged-in", "failed"))) {
-    stop("Agrument staus must be a member of {start, logged-in}")
+    stop("Agrument staus must be a member of {start, logged-in, failed}")
   }
 
   #################### Create Sidebar   ################
@@ -31,10 +29,10 @@ auth_sidebar = function(input, output, session, status){
         ### Login to the app
         shiny::textInput(inputId = "user",
                          label   = "Employee ID:",
-                         value   = 143400),
+                         value   = ""),
         shiny::passwordInput(inputId = "password",
                              label   = "Password:",
-                             value   = "A"),
+                             value   = ""),
 
         shiny::HTML("<p> <br/> </p>"),
 
@@ -43,8 +41,6 @@ auth_sidebar = function(input, output, session, status){
                             width   = "100%",
                             icon    = shiny::icon("sign-in")))
     })
-    # Exit the function
-    return()
 
   } else if (status == "failed") {
     ## Render the Sidbar Meneu after a failed logon
@@ -78,25 +74,19 @@ auth_sidebar = function(input, output, session, status){
                                  width    = "100%",
                                  color    = "yellow"))
     })
-    # Exit the function
-    return()
 
   } else if (status == "logged-in") {
 
     output$auth_sidebar = shiny::renderUI({
-      shinydashboard::sidebarMenu(
-#
-#         id = "auth_tabs",
-#
-#         shinydashboard::menuItem(text     = "Settings",
-#                                  tabName  = "settings"),
-#
-#         shinydashboard::menuItem(text     = "Admin",
-#                                  tabName  = "admin")
-      )
+      # shinydashboard::sidebarMenu(
+      #
+      #   shinydashboard::menuItem(text     = "Settings",
+      #                            tabName  = "settings"),
+      #
+      #   shinydashboard::menuItem(text     = "Admin",
+      #                            tabName  = "admin")
+      # )
     })
 
-    # Exit the function
-    return()
   }
 }

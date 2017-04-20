@@ -4,7 +4,7 @@
 \alias{users_table_creation}
 \title{Create table of users with buttons to change password and user details}
 \usage{
-users_table_creation(input, output, session, dt_users)
+users_table_creation(input, output, session, auth, dt_users)
 }
 \description{
 Create table of users with buttons to change password and user details

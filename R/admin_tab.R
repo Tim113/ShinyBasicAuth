@@ -11,7 +11,7 @@ admin_tab = function(input, output, session, auth){
     dt_users = get_users_table(input, output, session, auth)
 
     # DT of the users
-    users_table_creation(input, output, session, dt_users)
+    users_table_creation(input, output, session, auth, dt_users)
 
     ## Change Password
     change_user_password(input, output, session, auth)
@@ -140,8 +140,7 @@ render_admin_page = function(input, output, session){
 
   shiny::renderUI({
     shiny::conditionalPanel(
-      condition = "input.navtabs == 'admin'",
-
+      condition = "input.authMenuItems == 'admin'",
       shiny::fluidPage(
 
         page_tile("Admin"),
@@ -186,13 +185,13 @@ change_user_password = function(input, output, session, auth){
       dt_users = get_users_table(input, output, session, auth)
 
       # Remake the users table
-      users_table_creation(input, output, session, dt_users)
+      users_table_creation(input, output, session, auth, dt_users)
 
     })
 }
 
 #' Create table of users with buttons to change password and user details
-users_table_creation = function(input, output, session, dt_users) {
+users_table_creation = function(input, output, session, auth, dt_users) {
   ############################# Requiered for function #############################
   # This function will create the buttons for the datatable
   DT_Buttons = function(FUN, len, id, ...) {inputs = character(len)
@@ -207,17 +206,15 @@ users_table_creation = function(input, output, session, dt_users) {
   # Make copy of dt_users to make changes to
   dt_users_table = data.table::copy(dt_users)
 
-  dt_users_table[, name := paste(first_name, last_name), by = user_id]
-
   user_table_colnames =
-    c("Employee ID", "Name", "Line Manager",  "Admin", "Password", "Detils")
+    c(auth$table_cofig$user_id$human_name, "Admin", "Password", "Detils")
 
   ############################# Create Data Table to display #############################
   # Create reactive data.table that allows for the pressing of a button
   dt_users_reactive = shiny::reactive({
     data.table::as.data.table(cbind(
       # The data that we want to dispaly less the comments
-      dt_users_table[, .(user_id, name, users_moderator, admin)],
+      dt_users_table[, .(user_id, admin)],
 
       # Row containing the buttons for comments
       Password = DT_Buttons(actionButton, nrow(dt_users_table), 'row_', label = "Change Password",

@@ -1,0 +1,33 @@
+users_table:
+  dbname: ShinyBasicAuth
+  username: auth_user
+  password: mbwt2S9
+  host: 127.0.0.1
+  port: 3306
+
+table_cofig:
+  user_id:
+    human_name: User ID
+    user_changeable: FALSE
+    admin_changeable: FALSE
+    moderator_changeable: FALSE
+    type: integer
+  password:
+    human_name: Password
+    admin_changeable: TRUE
+    moderator_changeable: TRUE
+    max_age_in_days: 0
+    min_strength: N
+  date_created:
+  last_password_change:
+  admin:
+    human_name: Admin
+    admin_changeable: TRUE
+  moderator:
+    use_moderatior: FALSE
+    human_name: Moderator
+    admin_changeable: TRUE
+
+first_user:
+  user_id: 143400
+  password: Password
