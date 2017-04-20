@@ -57,13 +57,13 @@ change_user_details = function(input, output, session, auth, dt_settings_user) {
       title = paste0("Details for: ",
                      dt_settings_user[, user_id]),
       size      = "l",
-      easyClose = FALSE,
+      easyClose = TRUE,
       fade      = FALSE,
       footer    = shiny::tagList(
         shiny::actionButton(inputId =
                               ns(paste0("save",
                                         time_stamp)),
-                            label   = "Save Cahnges"),
+                            label   = "Save Changes"),
         shiny::modalButton("Close")
       ),
       shiny::uiOutput(ns("settings"))

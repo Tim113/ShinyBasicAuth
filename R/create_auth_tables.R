@@ -148,10 +148,10 @@ create_auth_tables = function(auth_config) {
 
       model_Users[, (col_name) := logical()]
 
-    } else if (auth_config$table_cofig[[col_name]]$type == "catagorical") {
+    } else if (auth_config$table_cofig[[col_name]]$type == "categorical") {
 
       # Check that the leves of the catagorcial verable have been set
-      if (is.null(auth_config$table_cofig[[col_name]]$categorical)) {
+      if (is.null(auth_config$table_cofig[[col_name]]$categories)) {
         stop(paste0(
           "There are no categories set in the config file for column: ",
           col_name,
@@ -184,7 +184,7 @@ create_auth_tables = function(auth_config) {
   # Connect to the db
   con = RMySQL::dbConnect(
     RMySQL::MySQL(),
-    dbname   = auth_config$users_table$db_name,
+    dbname   = auth_config$users_table$dbname,
     username = auth_config$users_table$username,
     password = auth_config$users_table$password,
     host     = auth_config$users_table$host,
@@ -206,7 +206,7 @@ create_auth_tables = function(auth_config) {
 
   # If using moderators, set the user as not a modorator
   if (auth_config$table_cofig$moderator$use_moderatior) {
-    dt_first_user[, moderatior := 1]
+    dt_first_user[, moderator := 1]
   }
 
   # Defult all logical columns to false

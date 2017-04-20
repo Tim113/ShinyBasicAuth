@@ -168,6 +168,7 @@ password_change_modal = function(input, output, session,
     shiny::modalDialog(
       title     = "Change Password",
       size      = "s",
+      easyClose = TRUE,
       fade      = FALSE,
       footer    = shiny::tagList(
         shiny::actionButton(inputId =
@@ -208,6 +209,7 @@ password_change_modal = function(input, output, session,
     shiny::modalDialog(
       title     = "Reset Password",
       size      = "s",
+      easyClose = TRUE,
       fade      = FALSE,
       footer    = shiny::tagList(
         shiny::actionButton(inputId =

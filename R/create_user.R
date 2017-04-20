@@ -114,6 +114,7 @@ create_user_modal = function(input, output, session, time_stamp){
   shiny::modalDialog(
     title     = "Create User",
     size      = "s",
+    easyClose = TRUE,
     fade      = FALSE,
     footer    = shiny::tagList(
       shiny::actionButton(inputId =
