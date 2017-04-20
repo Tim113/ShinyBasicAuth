@@ -1,15 +1,26 @@
 #' Manage the logon, and the changes of the UI based upon
 #'
-#' @param con Database connection or pool
 #' @param server Shiny Server function to run when a user is logged on, must take aut as argument
 #' @param auth_config File path to auth_config file
 #'
 #' @import data.table
 #' @import magrittr
 #' @export
-auth_server = function(con,
-                       server,
+auth_server = function(server,
                        config_path) {
+
+  # Load the config file
+  auth_config = yaml::yaml.load_file(config_path)
+
+  # Connect to the db
+  con = pool::dbPool(
+    drv      = RMySQL::MySQL(),
+    dbname   = auth_config$users_table$dbname,
+    username = auth_config$users_table$username,
+    password = auth_config$users_table$password,
+    host     = auth_config$users_table$host,
+    port     = auth_config$users_table$port
+  )
 
   # Make regular shiny server
   shiny::shinyServer(function(input, output, session) {
@@ -25,7 +36,7 @@ auth_server = function(con,
       # if not it will return null
 
       # Create auth object to pass to logged_on_server
-      auth = make_auth_object(con, config_path)
+      auth = make_auth_object(con, auth_config)
 
       # loggedin_user_id shoudl be treated as the sacrosanct identifyer of the logged in user
       loggedin_user_id = auth_check(input, output, session, auth)
@@ -63,6 +74,10 @@ auth_server = function(con,
 
         ### Render the admin tab
         admin_tab(input, output, session, auth)
+
+        ### Redner the page body
+        auth_body(input, output, session,
+                  status = "logged-in")
 
         ### Run the server code
         server(input, output, session, auth)
@@ -105,8 +120,10 @@ get_dt_user = function(auth) {
   # Make the admin column logical
   dt_user = dt_user[, admin := as.logical(admin)]
 
-  # Make the moderator column logical
-  dt_user = dt_user[, moderator := as.logical(moderator)]
+  # Make the moderator column logical if it exits
+  if (shiny::isTruthy(auth$table_cofig$moderator$use_moderatior)) {
+    dt_user = dt_user[, moderator := as.logical(moderator)]
+  }
 
   return(dt_user)
 }

@@ -173,12 +173,12 @@ render_settings_page = function(input, output, session, auth,
           )
         )
 
-        )
-      })
+      )
+    })
   } else {
     ui = shiny::renderUI({
       shiny::conditionalPanel(
-        condition = "input.navtabs == 'settings'",
+        condition = "input.authMenuItems == 'settings'",
 
         shiny::fluidPage(
 
@@ -242,7 +242,7 @@ render_settings_box = function(input, output, session, auth,
                                inputId = ns(column_name),
                                label   = NULL,
                                value   = as.logical(dt_user[, ..column_name])
-                               ))
+                             ))
 
   } else if (column_name %in% c("users_moderator")) {
     # Get list of moderators

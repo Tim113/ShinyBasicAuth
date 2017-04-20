@@ -4,7 +4,10 @@
 #' @import data.table
 #' @import magrittr
 #' @export
-create_auth_tables = function(auth_config) {
+create_auth_tables = function(auth_config_path) {
+
+  # Load the config file
+  auth_config = yaml::yaml.load_file(auth_config_path)
 
   #################### Basic Checks ##########
   # Check that auth_config has all of the requiered columns

@@ -2,10 +2,8 @@
 #'
 #' @import data.table
 #' @import magrittr
-make_auth_object = function(con, config_path) {
+make_auth_object = function(con, auth_config) {
   # Extract the table names, or set defults in the auth object from auth_config
-
-  auth_config = yaml::yaml.load_file(config_path)
 
   auth = list(
     con         = con,
