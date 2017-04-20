@@ -179,24 +179,26 @@ password_change_modal = function(input, output, session,
       ),
 
       # Body of Modal Window
-      shiny::fluidRow(
-        shiny::passwordInput(
-          inputId = "old_password",
-          label   = "Old Password",
-          width   = "100%"),
-        shiny::passwordInput(
-          inputId = "new_password_main",
-          label   = "New Password",
-          width   = "100%"),
-        shiny::passwordInput(
-          inputId = "new_password_confirm",
-          label   = "Confirm New Password",
-          width   = "100%"),
-        shiny::checkboxInput(
-          inputId = "password_change_confirm",
-          label   = "Confirm Password Change",
-          value   = FALSE,
-          width   = "100%")
+      shiny::fluidPage(
+        shiny::fluidRow(
+          shiny::passwordInput(
+            inputId = "old_password",
+            label   = "Old Password",
+            width   = "100%"),
+          shiny::passwordInput(
+            inputId = "new_password_main",
+            label   = "New Password",
+            width   = "100%"),
+          shiny::passwordInput(
+            inputId = "new_password_confirm",
+            label   = "Confirm New Password",
+            width   = "100%"),
+          shiny::checkboxInput(
+            inputId = "password_change_confirm",
+            label   = "Confirm Password Change",
+            value   = FALSE,
+            width   = "100%")
+        )
       )
     )
   } else {
@@ -220,6 +222,7 @@ password_change_modal = function(input, output, session,
       ),
 
       # Body of Modal Window
+      shiny::fluidPage(
       shiny::fluidRow(
         shiny::textInput(
           inputId = "new_password_main",
@@ -231,7 +234,7 @@ password_change_modal = function(input, output, session,
           value   = FALSE,
           width   = "100%")
       )
-    )
+    ))
   }
 
 }

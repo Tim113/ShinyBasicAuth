@@ -117,63 +117,68 @@ render_settings_page = function(input, output, session, auth,
     x = names(auth$table_cofig[cond]),
     y = c("password", "admin"))
 
+  # Remove moderator from changeable_columns if user moderaror is false
+  if (!shiny::isTruthy(auth$table_cofig$moderator$use_moderatior)) {
+    changeable_columns = setdiff(
+      x = changeable_columns,
+      y = c("moderator"))
+  }
+
   ns = session$ns
 
   ### Render the ui
   # This will be diffrent dependent on if it is called by settings or admin
   if (permissions == "admin") {
     ui = shiny::renderUI({
-      shiny::tagList(
-        page_tile("Settings"),
+      shiny::fluidPage(
+          page_tile("Settings"),
 
-        # Verable boxes
-        shiny::fluidRow(
-          lapply(
-            X = changeable_columns,
-            FUN     = render_settings_box,
-            input   = input,
-            output  = output,
-            session = session,
-            auth    = auth,
-            dt_user = dt_user)),
+          # Verable boxes
+          shiny::fluidRow(
+            lapply(
+              X = changeable_columns,
+              FUN     = render_settings_box,
+              input   = input,
+              output  = output,
+              session = session,
+              auth    = auth,
+              dt_user = dt_user)),
 
-        shiny::fluidRow(
-          shinydashboard::box(
-            width       = 12,
-            collapsible = TRUE,
-            collapsed   = TRUE,
-            title = "Grant and Revoke Admin Rights",
+          shiny::fluidRow(
+            shinydashboard::box(
+              width       = 12,
+              collapsible = TRUE,
+              collapsed   = TRUE,
+              title = "Grant and Revoke Admin Rights",
 
-            shiny::checkboxInput(
-              inputId = ns("is_admin"),
-              label   = "User is Admin",
-              value   = dt_user[, admin]),
-            shiny::HTML("<p> <br/> </p>"),
+              shiny::checkboxInput(
+                inputId = ns("is_admin"),
+                label   = "User is Admin",
+                value   = dt_user[, admin]),
+              shiny::HTML("<p> <br/> </p>"),
 
-            paste0("To make sure that you want to do this please type in to the box the users ",
-                   auth$table_cofig$user_id$human_name,
-                   "."),
-            shiny::HTML("<p> <br/> </p>"),
+              paste0("To make sure that you want to do this please type in to the box the users ",
+                     auth$table_cofig$user_id$human_name,
+                     "."),
+              shiny::HTML("<p> <br/> </p>"),
 
-            shiny::textInput(
-              inputId = ns("confirm_text"),
-              label   = NULL,
-              width   = "200px"),
-            shiny::HTML("<p> <br/> </p>"),
+              shiny::textInput(
+                inputId = ns("confirm_text"),
+                label   = NULL,
+                width   = "200px"),
+              shiny::HTML("<p> <br/> </p>"),
 
-            shiny::checkboxInput(
-              inputId = ns("confirm_box"),
-              label   = "Confirm Status Change"),
-            shiny::HTML("<p> <br/> </p>"),
+              shiny::checkboxInput(
+                inputId = ns("confirm_box"),
+                label   = "Confirm Status Change"),
+              shiny::HTML("<p> <br/> </p>"),
 
-            shiny::actionButton(
-              inputId = ns(paste0("change_admin_status",
-                                  time_stamp)),
-              label   = "Change Admin Status")
-          )
-        )
-
-      )
+              shiny::actionButton(
+                inputId = ns(paste0("change_admin_status",
+                                    time_stamp)),
+                label   = "Change Admin Status")
+            )
+      ))
     })
   } else {
     ui = shiny::renderUI({
@@ -244,7 +249,7 @@ render_settings_box = function(input, output, session, auth,
                                value   = as.logical(dt_user[, ..column_name])
                              ))
 
-  } else if (column_name %in% c("users_moderator")) {
+  } else if (column_name == "users_moderator") {
     # Get list of moderators
     moderators_list = DBI::dbGetQuery(
       conn      = auth$con,
