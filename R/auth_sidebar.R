@@ -1,3 +1,24 @@
+#' Function that creates a sidebar with the id authMenuItems and ShinyBasicAuth tabs automaticly
+#' This should be used like shinydashboard::sidebarMenu exept the id cannot be changed
+#'
+#' @import data.table
+#' @export
+authSidebarMenu = function(auth, ...) {
+  shinydashboard::sidebarMenu(
+    id = "authMenuItems",
+
+    ...,
+
+    shinydashboard::menuItem(text     = "Settings",
+                             tabName  = "settings"),
+
+    if (auth$dt_user[, admin]) {
+      shinydashboard::menuItem(text     = "Admin",
+                               tabName  = "admin")
+    }
+  )
+}
+
 #' Create the sidbar for the dashboard, diffrent dependent upon the status of the app
 #'
 #' @param status What is the status of the app and as such which of the sidebars should be shown
