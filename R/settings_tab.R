@@ -301,7 +301,7 @@ render_settings_box = function(input, output, session, auth,
 page_tile = function(title){
   shiny::fluidRow(
     shinydashboard::box(width  = 12,
-                        height = "60px",
+                        height = "40px",
                         title  = shiny::HTML(paste0("<p style='font-size:20px'>",
                                                     title,
                                                     "</p>"))
