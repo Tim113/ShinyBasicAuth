@@ -29,12 +29,12 @@ auth_check = function(input, output, session, auth) {
                                  " WHERE ",
                                  " user_id = ?id1;")
 
-  query_hashed_password = DBI::sqlInterpolate(auth$con, sql_hashed_password,
+  query_hashed_password = DBI::sqlInterpolate(auth$pool_auth, sql_hashed_password,
                                               id1 = given_user_id)
 
   # Retreve the query from the db
   hashed_password =
-    DBI::dbGetQuery(auth$con, query_hashed_password) %>%
+    DBI::dbGetQuery(auth$pool_auth, query_hashed_password) %>%
     as.character()
 
   ### Check the given_user_id

@@ -187,7 +187,7 @@ create_auth_tables = function(auth_config_path) {
   # Connect to the db
   con = RMySQL::dbConnect(
     RMySQL::MySQL(),
-    dbname   = auth_config$users_table$dbname,
+    dbname   = auth_config$users_table$dbname_auth,
     username = auth_config$users_table$username,
     password = auth_config$users_table$password,
     host     = auth_config$users_table$host,

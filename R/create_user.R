@@ -83,12 +83,12 @@ save_new_user = function(input, output, session, auth) {
   }
 
   query_create_user =
-    DBI::sqlInterpolate(auth$con, sql_create_user,
+    DBI::sqlInterpolate(auth$pool_auth, sql_create_user,
                         user_id      = input$user_id,
                         password     = sodium::password_store(input$password),
                         admin        = as.numeric(input$make_admin))
 
-  DBI::dbGetQuery(auth$con, query_create_user)
+  DBI::dbGetQuery(auth$pool_auth, query_create_user)
 
   # Close the modal dialog box
   shiny::removeModal()
@@ -161,7 +161,7 @@ get_curret_user_ids = function(auth) {
     )
 
   suppressWarnings({
-    dt_res =  DBI::dbGetQuery(conn      = auth$con,
+    dt_res =  DBI::dbGetQuery(conn      = auth$pool_auth,
                               statement = query_users_table)
   })
 

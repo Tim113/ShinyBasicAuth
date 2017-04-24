@@ -2,11 +2,12 @@
 #'
 #' @import data.table
 #' @import magrittr
-make_auth_object = function(con, auth_config) {
+make_auth_object = function(pool_auth, pool_data, auth_config) {
   # Extract the table names, or set defults in the auth object from auth_config
 
   auth = list(
-    con         = con,
+    pool_auth   = pool_auth,
+    pool_data   = pool_data,
     user_id     = NULL,
     dt_user     = NULL,
     table_cofig = auth_config$table_cofig

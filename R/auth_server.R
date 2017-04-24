@@ -12,15 +12,32 @@ auth_server = function(server,
   # Load the config file
   auth_config = yaml::yaml.load_file(config_path)
 
-  # Connect to the db
-  con = pool::dbPool(
+  # Connect to the auth db
+  pool_auth = pool::dbPool(
     drv      = RMySQL::MySQL(),
-    dbname   = auth_config$users_table$dbname,
+    dbname   = auth_config$users_table$dbname_auth,
     username = auth_config$users_table$username,
     password = auth_config$users_table$password,
     host     = auth_config$users_table$host,
     port     = auth_config$users_table$port
   )
+
+  # Connect to the data_db
+  if (is.null(auth_config$users_table$dbname_data)) {
+    pool_data = NULL
+  } else if (auth_config$users_table$dbname_data ==
+             auth_config$users_table$dbname_auth) {
+    pool_data = pool_auth
+  } else {
+    pool_data = pool::dbPool(
+      drv      = RMySQL::MySQL(),
+      dbname   = auth_config$users_table$dbname_data,
+      username = auth_config$users_table$username,
+      password = auth_config$users_table$password,
+      host     = auth_config$users_table$host,
+      port     = auth_config$users_table$port
+    )
+  }
 
   # Make regular shiny server
   shiny::shinyServer(function(input, output, session) {
@@ -36,7 +53,7 @@ auth_server = function(server,
       # if not it will return null
 
       # Create auth object to pass to logged_on_server
-      auth = make_auth_object(con, auth_config)
+      auth = make_auth_object(pool_auth, pool_data, auth_config)
 
       # loggedin_user_id shoudl be treated as the sacrosanct identifyer of the logged in user
       loggedin_user_id = auth_check(input, output, session, auth)
@@ -107,13 +124,13 @@ get_dt_user = function(auth) {
   # The password is correct so get the rest of the user information from the db
   # and return it to the calling funciton
   sql_user_info   = paste0("SELECT * FROM Users WHERE user_id = ?user_id;")
-  query_user_info = DBI::sqlInterpolate(auth$con, sql_user_info ,
+  query_user_info = DBI::sqlInterpolate(auth$pool_auth, sql_user_info ,
                                         user_id = auth$user_id)
 
   # Retreve the query from the db
   suppressWarnings({
     dt_user =
-      DBI::dbGetQuery(auth$con, query_user_info) %>%
+      DBI::dbGetQuery(auth$pool_auth, query_user_info) %>%
       data.table::setDT(.)
   })
 

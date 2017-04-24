@@ -88,6 +88,8 @@ auth_sidebar = function(input, output, session, status){
                             width   = "100%",
                             icon    = shiny::icon("sign-in")),
 
+        shiny::HTML("<p> <br/> </p>"),
+
         # Dispaly error message
         shinydashboard::valueBox(value    = "",
                                  subtitle = "Username or password incorrect.",

@@ -1,5 +1,5 @@
 users_table:
-  dbname: ShinyBasicAuth
+  dbname_auth: ShinyBasicAuth
   username: auth_user
   password: mbwt2S9
   host: 127.0.0.1

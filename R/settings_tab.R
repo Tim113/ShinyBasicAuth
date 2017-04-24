@@ -74,12 +74,12 @@ save_user_details = function(input, output, session, auth,
       )
 
     query_save_user_details =
-      DBI::sqlInterpolate(auth$con, sql_save_user_details,
+      DBI::sqlInterpolate(auth$pool_auth, sql_save_user_details,
                           value   = input[[col_name]],
                           user_id = dt_user[, user_id])
 
     # Send the qeruy
-    DBI::dbGetQuery(auth$con, query_save_user_details)
+    DBI::dbGetQuery(auth$pool_auth, query_save_user_details)
   }
 
   # Tell the user the save has been sucessfull
@@ -252,7 +252,7 @@ render_settings_box = function(input, output, session, auth,
   } else if (column_name == "users_moderator") {
     # Get list of moderators
     moderators_list = DBI::dbGetQuery(
-      conn      = auth$con,
+      conn      = auth$pool_auth,
       statement = "SELECT user_id FROM Users WHERE moderator = '1';")
 
     ui = shinydashboard::box(width = 4,

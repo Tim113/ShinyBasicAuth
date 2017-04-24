@@ -136,11 +136,11 @@ save_new_password = function(session, auth,
     )
 
   query_update_password =
-    DBI::sqlInterpolate(auth$con, sql_update_password,
+    DBI::sqlInterpolate(auth$pool_auth, sql_update_password,
                         password = new_password,
                         user_id  = auth$user_id)
 
-  DBI::dbGetQuery(auth$con, query_update_password)#
+  DBI::dbGetQuery(auth$pool_auth, query_update_password)#
 
   # Let the user know the password has been saved to the db
   session$sendCustomMessage(

@@ -119,12 +119,12 @@ change_user_admin_status = function(input, output, session, auth,
       )
 
     query_save_user_details =
-      DBI::sqlInterpolate(auth$con, sql_save_user_details,
+      DBI::sqlInterpolate(auth$pool_auth, sql_save_user_details,
                           admin   = as.numeric(input$is_admin),
                           user_id = dt_user[, user_id])
 
     # Send the qeruy
-    DBI::dbGetQuery(auth$con, query_save_user_details)
+    DBI::dbGetQuery(auth$pool_auth, query_save_user_details)
 
     session$sendCustomMessage(
       type    = 'testmessage',
@@ -259,7 +259,7 @@ get_users_table = function(input, output, session, auth) {
     )
 
   suppressWarnings({
-    dt_res =  DBI::dbGetQuery(conn      = auth$con,
+    dt_res =  DBI::dbGetQuery(conn      = auth$pool_auth,
                               statement = query_users_table)
   })
 
