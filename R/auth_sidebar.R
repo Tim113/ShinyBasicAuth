@@ -48,67 +48,65 @@ auth_sidebar = function(input, output, session, status){
       # The inital sidebar menue
       shinydashboard::sidebarMenu(
         ### Login to the app
-        shiny::textInput(inputId = "user",
-                         label   = "Employee ID:",
-                         value   = ""),
-        shiny::passwordInput(inputId = "password",
-                             label   = "Password:",
-                             value   = ""),
+        shiny::textInput(
+          inputId = "user",
+          label   = shiny::h4("Employee ID:"),
+          value   = ""),
+
+        shiny::passwordInput(
+          inputId = "password",
+          label   = shiny::h4("Password:"),
+          value   = ""),
 
         shiny::HTML("<p> <br/> </p>"),
 
-        shiny::actionButton(inputId = "login",
-                            label   = "Login",
-                            width   = "100%",
-                            icon    = shiny::icon("sign-in")))
+        shiny::actionButton(
+          inputId = "login",
+          label   = "Login",
+          width   = "100%",
+          icon    = shiny::icon("sign-in")))
     })
 
   } else if (status == "failed") {
     ## Render the Sidbar Meneu after a failed logon
-
-    # Get the user_id and save it
-    user_id = input$user
 
     # Render
     output$auth_sidebar = shiny::renderUI({
       # The inital sidebar menue
       shinydashboard::sidebarMenu(
         ### Login to the app
-        shiny::textInput(inputId = "user",
-                         label   = "Employee ID:",
-                         value   = user_id),
-        shiny::passwordInput(inputId = "password",
-                             label   = "Password:",
-                             value   = NULL),
+        shiny::textInput(
+          inputId = "user",
+          label   = shiny::h4("Employee ID:"),
+          value   = ""),
+
+        shiny::passwordInput(
+          inputId = "password",
+          label   = shiny::h4("Password:"),
+          value   = ""),
 
         shiny::HTML("<p> <br/> </p>"),
 
-        shiny::actionButton(inputId = "login",
-                            label   = "Login",
-                            width   = "100%",
-                            icon    = shiny::icon("sign-in")),
+        shiny::actionButton(
+          inputId = "login",
+          label   = "Login",
+          width   = "100%",
+          icon    = shiny::icon("sign-in")),
 
         shiny::HTML("<p> <br/> </p>"),
 
         # Dispaly error message
-        shinydashboard::valueBox(value    = "",
-                                 subtitle = "Username or password incorrect.",
-                                 icon     = NULL,
-                                 width    = "100%",
-                                 color    = "yellow"))
+        shinydashboard::valueBox(
+          value    = "",
+          subtitle = "Username or password incorrect.",
+          icon     = NULL,
+          width    = "100%",
+          color    = "yellow"))
     })
 
   } else if (status == "logged-in") {
 
     output$auth_sidebar = shiny::renderUI({
-      # shinydashboard::sidebarMenu(
-      #
-      #   shinydashboard::menuItem(text     = "Settings",
-      #                            tabName  = "settings"),
-      #
-      #   shinydashboard::menuItem(text     = "Admin",
-      #                            tabName  = "admin")
-      # )
     })
 
   }

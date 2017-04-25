@@ -9,6 +9,19 @@
 auth_server = function(server,
                        config_path) {
 
+  ### Tests
+  # Check that the server function has the right aguments
+  server_arguments = names(formals(server))
+
+  # Check that server contains all of the requiered argumnets
+  if (!setequal(
+      x = server_arguments,
+      y = c("input", "output", "session", "auth"))) {
+    stop("The argmunts of the given server function are incorrect.",
+         "  The arguments of server must be exacly {input, output, session and auth}.")
+  }
+
+  ### Connect to db
   # Load the config file
   auth_config = yaml::yaml.load_file(config_path)
 
