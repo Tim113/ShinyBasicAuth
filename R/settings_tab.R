@@ -105,16 +105,16 @@ render_settings_page = function(input, output, session, auth,
   ### Get list of valid chagable verables
   # Find all of the rows that are spesificly user changable
   if (permissions == "admin") {
-    cond = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$admin_changeable))
+    changeable = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$admin_changeable))
   } else if (permissions == "moderator") {
-    cond = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$moderator_changeable))
+    changeable = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$moderator_changeable))
   } else {
-    cond = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$user_changeable))
+    changeable = sapply(auth$table_cofig, function(x) shiny::isTruthy(x$user_changeable))
   }
 
   # Extract just the chanable columns, excluding those changed via other means
   changeable_columns = setdiff(
-    x = names(auth$table_cofig[cond]),
+    x = names(auth$table_cofig[changeable]),
     y = c("password", "admin"))
 
   # Remove moderator from changeable_columns if user moderaror is false
@@ -123,6 +123,15 @@ render_settings_page = function(input, output, session, auth,
       x = changeable_columns,
       y = c("moderator"))
   }
+
+  ### Get list of valid viewable verables
+  # All columns defult to viewable (expect password)
+  viewable = sapply(auth$table_cofig, function(x) !shiny::isTruthy(x$hidden))
+
+  # Extract just the viewable columns,
+  viewable_columns = setdiff(
+    x = names(auth$table_cofig[viewable]),
+    y = c("password", "admin", changeable_columns))
 
   ns = session$ns
 
@@ -142,7 +151,17 @@ render_settings_page = function(input, output, session, auth,
               output  = output,
               session = session,
               auth    = auth,
-              dt_user = dt_user)),
+              dt_user = dt_user),
+
+            lapply(
+              X = viewable_columns,
+              FUN       = render_settings_box,
+              input     = input,
+              output    = output,
+              session   = session,
+              auth      = auth,
+              dt_user   = dt_user,
+              read_only = TRUE)),
 
           shiny::fluidRow(
             shinydashboard::box(
@@ -198,7 +217,17 @@ render_settings_page = function(input, output, session, auth,
               output  = output,
               session = session,
               auth    = auth,
-              dt_user = dt_user)),
+              dt_user = dt_user),
+
+            lapply(
+              X = viewable_columns,
+              FUN       = render_settings_box,
+              input     = input,
+              output    = output,
+              session   = session,
+              auth      = auth,
+              dt_user   = dt_user,
+              read_only = TRUE)),
 
           shiny::fluidRow(
             shinydashboard::box(width = 4,
@@ -232,7 +261,7 @@ render_settings_page = function(input, output, session, auth,
 
 #' @import data.table
 render_settings_box = function(input, output, session, auth,
-                               column_name, dt_user) {
+                               column_name, dt_user, read_only = FALSE) {
 
   ns = session$ns
 
@@ -240,14 +269,20 @@ render_settings_box = function(input, output, session, auth,
   type = auth$table_cofig[[column_name]]$type
 
   # Check for special case
-  if (column_name %in% c("moderator", "admin")) {
-    ui = shinydashboard::box(width = 4,
-                             title = auth$table_cofig[[column_name]]$human_name,
-                             shiny::checkboxInput(
-                               inputId = ns(column_name),
-                               label   = NULL,
-                               value   = as.logical(dt_user[, ..column_name])
-                             ))
+  if (read_only) {
+    ui = shinydashboard::box(
+      width = 4,
+      title = auth$table_cofig[[column_name]]$human_name,
+      dt_user[, ..column_name])
+
+  } else if (column_name %in% c("moderator", "admin")) {
+    ui = shinydashboard::box(
+      width = 4,
+      title = auth$table_cofig[[column_name]]$human_name,
+      shiny::checkboxInput(
+        inputId = ns(column_name),
+        label   = NULL,
+        value   = as.logical(dt_user[, ..column_name])))
 
   } else if (column_name == "users_moderator") {
     # Get list of moderators
@@ -255,41 +290,46 @@ render_settings_box = function(input, output, session, auth,
       conn      = auth$pool_auth,
       statement = "SELECT user_id FROM Users WHERE moderator = '1';")
 
-    ui = shinydashboard::box(width = 4,
-                             title = auth$table_cofig[[column_name]]$human_name,
-                             shiny::selectInput(
-                               inputId  = ns(column_name),
-                               label    = NULL,
-                               choices  = moderators_list[, "user_id"],
-                               selected = dt_user[, ..column_name]))
+    ui = shinydashboard::box(
+      width = 4,
+      title = auth$table_cofig[[column_name]]$human_name,
+      shiny::selectInput(
+        inputId  = ns(column_name),
+        label    = NULL,
+        choices  = moderators_list[, "user_id"],
+        selected = dt_user[, ..column_name]))
 
   } else if (type %in% c("character", "intiger", "decimal")) {
-    ui = shinydashboard::box(width = 4,
-                             title = auth$table_cofig[[column_name]]$human_name,
-                             shiny::textInput(
-                               inputId = ns(column_name),
-                               label   = NULL,
-                               value   = dt_user[, ..column_name]))
+    ui = shinydashboard::box(
+      width = 4,
+      title = auth$table_cofig[[column_name]]$human_name,
+      shiny::textInput(
+        inputId = ns(column_name),
+        label   = NULL,
+        value   = dt_user[, ..column_name]))
 
   } else if (type == "logical") {
-    ui = shinydashboard::box(width = 4,
-                             title = auth$table_cofig[[column_name]]$human_name,
-                             shiny::checkboxInput(
-                               inputId = ns(column_name),
-                               label   = NULL,
-                               value   = dt_user[, ..column_name]))
+    ui = shinydashboard::box(
+      width = 4,
+      title = auth$table_cofig[[column_name]]$human_name,
+      shiny::checkboxInput(
+        inputId = ns(column_name),
+        label   = NULL,
+        value   = dt_user[, ..column_name]))
 
   } else if (type == "categorical") {
     # Get the catagorys from auth
     catagorys = auth$table_cofig[[column_name]]$categories
 
-    ui = shinydashboard::box(width = 4,
-                             title = auth$table_cofig[[column_name]]$human_name,
-                             shiny::selectInput(
-                               inputId  = ns(column_name),
-                               label    = NULL,
-                               choices  = catagorys,
-                               selected = dt_user[, ..column_name]))
+    ui = shinydashboard::box(
+      width = 4,
+      title = auth$table_cofig[[column_name]]$human_name,
+      shiny::selectInput(
+        inputId  = ns(column_name),
+        label    = NULL,
+        choices  = catagorys,
+        selected = dt_user[, ..column_name]))
+
   } else {
     stop("The coloumn ", column_name, " is said to to be of type ", type,
          ".  This is not a valid column type.")
