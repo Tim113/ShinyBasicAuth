@@ -14,3 +14,4 @@ settings_tab(input, output, session, auth, permissions = "user")
 Create the settings tab
 This function needs to be able to trigger the fech of a new dt_user
 }
+

@@ -11,3 +11,4 @@ auth_check(input, output, session, auth)
 Check the username and password given in input$user and input$password respectivly in the current namespace
 If the credentuals are correct return the user information
 }
+

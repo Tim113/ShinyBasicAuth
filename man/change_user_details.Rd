@@ -9,3 +9,4 @@ change_user_details(input, output, session, auth, dt_settings_user)
 \description{
 Change users Deitals must be called from inside a name space
 }
+

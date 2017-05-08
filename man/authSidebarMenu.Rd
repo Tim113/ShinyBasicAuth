@@ -11,3 +11,4 @@ authSidebarMenu(auth, ...)
 Function that creates a sidebar with the id authMenuItems and ShinyBasicAuth tabs automaticly
 This should be used like shinydashboard::sidebarMenu exept the id cannot be changed
 }
+

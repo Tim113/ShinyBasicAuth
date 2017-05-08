@@ -9,3 +9,4 @@ save_new_password(session, auth, user_id, new_password)
 \description{
 Save a new password to the db
 }
+

@@ -10,7 +10,14 @@ password_change_manager = function(input, output, session, auth,
                                    user_id      = NULL,
                                    old_password = NULL){
   # If user_id has not been given then take it form auth object
-  user_id = auth$user_id
+  # This must only happen if auth == TRUE, else this will produce an error
+  if (!admin) {
+    user_id = auth$user_id
+  } else {
+    if (is.null(user_id)) {
+      stop("password_change_manager has been sarted from admin without a user_is")
+    }
+  }
 
   # If not acting as admin then there must be an old_password
   if (!admin & is.null(old_password)) {
@@ -94,9 +101,7 @@ password_change_manager = function(input, output, session, auth,
     eventExpr = input[[paste0("reset_password", time_stamp)]],
     handlerExpr = {
 
-
-
-      # Check that the coconformfurm password change box has been ticked
+      # Check that the conferm password change box has been ticked
       if (input$password_change_confirm) {
         # Save the new password to the db
         save_new_password(session, auth,
@@ -138,7 +143,7 @@ save_new_password = function(session, auth,
   query_update_password =
     DBI::sqlInterpolate(auth$pool_auth, sql_update_password,
                         password = new_password,
-                        user_id  = auth$user_id)
+                        user_id  = user_id)
 
   DBI::dbGetQuery(auth$pool_auth, query_update_password)#
 

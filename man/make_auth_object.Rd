@@ -4,8 +4,9 @@
 \alias{make_auth_object}
 \title{Make the auth object from the auth_config file and the connection}
 \usage{
-make_auth_object(con, auth_config)
+make_auth_object(pool_auth, pool_data, auth_config)
 }
 \description{
 Make the auth object from the auth_config file and the connection
 }
+

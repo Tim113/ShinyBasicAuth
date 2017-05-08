@@ -14,7 +14,7 @@ admin_tab = function(input, output, session, auth){
     users_table_creation(input, output, session, auth, dt_users)
 
     ## Change Password
-    change_user_password(input, output, session, auth)
+    change_user_password(input, output, session, auth, dt_users)
 
     shiny::observeEvent(
       eventExpr  = input$details_button,
@@ -168,13 +168,15 @@ render_admin_page = function(input, output, session){
 }
 
 #' Chagne users password
-change_user_password = function(input, output, session, auth){
+change_user_password = function(input, output, session, auth, dt_users){
   #  When the button is pressed, extract the row number
   shiny::observeEvent(
     eventExpr   = input$password_button,
     handlerExpr = {
       # # Find the number of the row that has been selected
       selected_row = as.numeric(strsplit(input$password_button, "_")[[1]][2])
+
+      print(dt_users[selected_row, ])
 
       ShinyBasicAuth::password_change_manager(
         input, output, session, auth,

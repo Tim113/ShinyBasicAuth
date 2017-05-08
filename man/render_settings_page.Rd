@@ -15,3 +15,4 @@ render_settings_page(input, output, session, auth, permissions,
 \description{
 Function creating the ui for a settings page for a given user table
 }
+

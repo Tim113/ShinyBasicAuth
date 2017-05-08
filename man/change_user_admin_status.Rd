@@ -9,3 +9,4 @@ change_user_admin_status(input, output, session, auth, dt_user)
 \description{
 Function that allos for the awaring and revoking of admin rights
 }
+

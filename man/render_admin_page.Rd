@@ -9,3 +9,4 @@ render_admin_page(input, output, session)
 \description{
 Function creating the ui for a admin page
 }
+
