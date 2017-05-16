@@ -2,15 +2,8 @@ library(shiny)
 library(shinydashboard)
 library(ShinyBasicAuth)
 
-# The following line must have been run:
-ShinyBasicAuth::create_auth_tables(auth_config_path = "./auth_conf.yaml")
-
-### Call the sheppey auth server
-ShinyBasicAuth::auth_server(
-  server      = server_post_auth,
-  config_path = "./auth_conf.yaml")
-
-
+# # The following line must have been run:
+# ShinyBasicAuth::create_auth_tables(auth_config_path = "~/.auth_example.yaml")
 
 ### Server funciton to run when the user is logged in
 server_post_auth = function(input, output, session, auth) {
@@ -48,3 +41,8 @@ server_post_auth = function(input, output, session, auth) {
     )
   })
 }
+
+### Call the sheppey auth server
+ShinyBasicAuth::auth_server(
+  server      = server_post_auth,
+  config_path = "~/.auth_example.yaml")

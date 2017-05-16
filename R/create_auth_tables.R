@@ -207,6 +207,9 @@ create_auth_tables = function(auth_config_path) {
   # Set as admin
   dt_first_user[, admin := 1]
 
+  # Set the time and date of user creation
+  dt_first_user[, c("date_created", "last_password_change") := Sys.time()]
+
   # If using moderators, set the user as not a modorator
   if (auth_config$table_cofig$moderator$use_moderatior) {
     dt_first_user[, moderator := 1]
