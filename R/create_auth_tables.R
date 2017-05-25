@@ -16,6 +16,7 @@ create_auth_tables = function(auth_config_path) {
     "password",
     "date_created",
     "last_password_change",
+    "change_password",
     "admin",
     "moderator"
   )
@@ -82,6 +83,10 @@ create_auth_tables = function(auth_config_path) {
   ########## Last Password Change
   # make the last_password_change column
   model_Users[, last_password_change := as.Date(character())]
+
+  ########## Cahnge Password
+  # make the change_passowrd column
+  model_Users[, change_password := logical()]
 
   ########## Admin
   # make the admin column
@@ -209,6 +214,9 @@ create_auth_tables = function(auth_config_path) {
 
   # Set the time and date of user creation
   dt_first_user[, c("date_created", "last_password_change") := Sys.time()]
+
+  # Set password_change to 0 i.e. FALSE
+  dt_first_user[, change_password := 0]
 
   # If using moderators, set the user as not a modorator
   if (auth_config$table_cofig$moderator$use_moderatior) {

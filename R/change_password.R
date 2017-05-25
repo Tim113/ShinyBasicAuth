@@ -71,11 +71,11 @@ password_change_manager = function(input, output, session, auth,
         # Close the modal dialog box
         shiny::removeModal()
 
-        # Remake the modal to remove the passwords from memory
-        password_modal = password_change_modal(input, output, session,
-                                               admin,
-                                               user_id,
-                                               time_stamp)
+        # # Remake the modal to remove the passwords from memory
+        # password_modal = password_change_modal(input, output, session,
+        #                                        admin,
+        #                                        user_id,
+        #                                        time_stamp)
         gc()
       } else {
         ### Find the error then dispaly message to user explaing the problem

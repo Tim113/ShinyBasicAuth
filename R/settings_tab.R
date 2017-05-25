@@ -131,7 +131,8 @@ render_settings_page = function(input, output, session, auth,
   # Extract just the viewable columns,
   viewable_columns = setdiff(
     x = names(auth$table_cofig[viewable]),
-    y = c("password", "admin", "date_created", "last_password_change", changeable_columns))
+    y = c("password", "admin", "date_created", "last_password_change", "change_password",
+          changeable_columns))
 
   # Remove moderator from changeable_columns if user moderaror is false
   if (!shiny::isTruthy(auth$table_cofig$moderator$use_moderatior)) {
@@ -292,7 +293,7 @@ render_settings_box = function(input, output, session, auth,
         label   = NULL,
         value   = as.logical(dt_user[, ..column_name])))
 
-  }else if (column_name == "admin") {
+  } else if (column_name %in% c("admin", "change_password")) {
     ui = shinydashboard::box(
       width = 4,
       title = auth$table_cofig[[column_name]]$human_name,
