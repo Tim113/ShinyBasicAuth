@@ -333,7 +333,7 @@ render_settings_box = function(input, output, session, auth,
       shiny::checkboxInput(
         inputId = ns(column_name),
         label   = NULL,
-        value   = dt_user[, ..column_name]))
+        value   = as.logical(dt_user[, ..column_name])))
 
   } else if (type == "categorical") {
     # Get the catagorys from auth
