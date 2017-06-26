@@ -4,7 +4,7 @@
 \alias{change_user_password}
 \title{Chagne users password}
 \usage{
-change_user_password(input, output, session, auth)
+change_user_password(input, output, session, auth, dt_users)
 }
 \description{
 Chagne users password

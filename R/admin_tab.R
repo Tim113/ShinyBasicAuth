@@ -176,8 +176,6 @@ change_user_password = function(input, output, session, auth, dt_users){
       # # Find the number of the row that has been selected
       selected_row = as.numeric(strsplit(input$password_button, "_")[[1]][2])
 
-      print(dt_users[selected_row, ])
-
       ShinyBasicAuth::password_change_manager(
         input, output, session, auth,
         admin   = TRUE,
