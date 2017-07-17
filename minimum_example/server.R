@@ -29,7 +29,17 @@ server_post_auth = function(input, output, session, auth) {
           title = "Controls",
           sliderInput("slider", "Number of observations:", 1, 100, 50)
         )
-      ))
+      ),
+
+      # Let the user know if running in shiny server
+      fluidRow(
+        box(
+          title = "Running in Shiny Server",
+          serverInfo()$shinyServer
+        )
+      )
+
+      )
   })
 
   output$sidebar = renderUI({
@@ -40,6 +50,7 @@ server_post_auth = function(input, output, session, auth) {
 
     )
   })
+
 }
 
 ### Call the sheppey auth server

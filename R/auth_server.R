@@ -6,8 +6,7 @@
 #' @import data.table
 #' @import magrittr
 #' @export
-auth_server = function(server,
-                       config_path) {
+auth_server = function(server, config_path) {
 
   ### Tests
   # Check that the server function has the right aguments
@@ -21,36 +20,8 @@ auth_server = function(server,
          "  The arguments of server must be exacly {input, output, session and auth}.")
   }
 
-  ### Connect to db
-  # Load the config file
-  auth_config = yaml::yaml.load_file(config_path)
-
-  # Connect to the auth db
-  pool_auth = pool::dbPool(
-    drv      = RMySQL::MySQL(),
-    dbname   = auth_config$users_table$dbname_auth,
-    username = auth_config$users_table$username,
-    password = auth_config$users_table$password,
-    host     = auth_config$users_table$host,
-    port     = auth_config$users_table$port
-  )
-
-  # Connect to the data_db
-  if (is.null(auth_config$users_table$dbname_data)) {
-    pool_data = NULL
-  } else if (auth_config$users_table$dbname_data ==
-             auth_config$users_table$dbname_auth) {
-    pool_data = pool_auth
-  } else {
-    pool_data = pool::dbPool(
-      drv      = RMySQL::MySQL(),
-      dbname   = auth_config$users_table$dbname_data,
-      username = auth_config$users_table$username,
-      password = auth_config$users_table$password,
-      host     = auth_config$users_table$host,
-      port     = auth_config$users_table$port
-    )
-  }
+  # Create auth object to pass to logged_on_server
+  auth = make_auth_object(config_path)
 
   # Make regular shiny server
   shiny::shinyServer(function(input, output, session) {
@@ -64,9 +35,6 @@ auth_server = function(server,
       # Check to see if the password is correct
       # If there is a sucessfull logon then this will be a datatable of the users information
       # if not it will return null
-
-      # Create auth object to pass to logged_on_server
-      auth = make_auth_object(pool_auth, pool_data, auth_config)
 
       # loggedin_user_id shoudl be treated as the sacrosanct identifyer of the logged in user
       loggedin_user_id = auth_check(input, output, session, auth)
