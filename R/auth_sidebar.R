@@ -28,49 +28,23 @@ authSidebarMenu = function(auth, ...) {
 auth_sidebar = function(input, output, session, status){
   #################### Explanation
   # There are three possible states for the sidebar
-  # 1. No-login attempt ("start")
-  # 3. User logged in ("logged-in")
-  # 2. Login Failed     ("failed")
+  # 1. No-login attempt      ("start")
+  # 2. User logged in        ("logged-in")
+  # 3. Login Failed          ("failed")
+  # 4. Password just changed ("password_changed")
   # Each of these will have their own side bar, and thus will need diffrent deffintions
   # When this fucntion is called the state argument must be one of the three listed above
   # so that the funciton calls the rifht one
 
   # Insure that staus is on of the valid statu's for the list
-  if (!(status %in% c("start", "logged-in", "failed"))) {
-    stop("Agrument staus must be a member of {start, logged-in, failed}")
+  if (!(status %in% c("start", "logged-in", "failed", "password_changed"))) {
+    stop("Agrument staus must be a member of {start, logged-in, failed, password_changed}")
   }
 
   #################### Create Sidebar   ################
   # If status is start show the logon sidebar
-  if (status == "start") {
+  if (status %in% c("start", "failed", "password_changed")) {
     ## Render the Sidbar Meneu
-    output$auth_sidebar = shiny::renderUI({
-      # The inital sidebar menue
-      shinydashboard::sidebarMenu(
-        ### Login to the app
-        shiny::textInput(
-          inputId = "user",
-          label   = shiny::h4("Employee ID:"),
-          value   = ""),
-
-        shiny::passwordInput(
-          inputId = "password",
-          label   = shiny::h4("Password:"),
-          value   = ""),
-
-        shiny::HTML("<p> <br/> </p>"),
-
-        shiny::actionButton(
-          inputId = "login",
-          label   = "Login",
-          width   = "100%",
-          icon    = shiny::icon("sign-in")))
-    })
-
-  } else if (status == "failed") {
-    ## Render the Sidbar Meneu after a failed logon
-
-    # Render
     output$auth_sidebar = shiny::renderUI({
       # The inital sidebar menue
       shinydashboard::sidebarMenu(
@@ -93,15 +67,24 @@ auth_sidebar = function(input, output, session, status){
           width   = "100%",
           icon    = shiny::icon("sign-in")),
 
-        shiny::HTML("<p> <br/> </p>"),
+        if (status == "failed") {
+          # Dispaly error message
+          shinydashboard::valueBox(
+            value    = "",
+            subtitle = "Username or password incorrect.",
+            icon     = NULL,
+            width    = "100%",
+            color    = "yellow")
+        } else if (status == "password_changed") {
+          shinydashboard::valueBox(
+            value    = "",
+            subtitle = "Please login with new password.",
+            icon     = NULL,
+            width    = "100%",
+            color    = "light-blue")
+        }
 
-        # Dispaly error message
-        shinydashboard::valueBox(
-          value    = "",
-          subtitle = "Username or password incorrect.",
-          icon     = NULL,
-          width    = "100%",
-          color    = "yellow"))
+        )
     })
 
   } else if (status == "logged-in") {

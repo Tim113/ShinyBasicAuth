@@ -62,6 +62,11 @@ save_user_details = function(input, output, session, auth,
     x = names(auth$table_cofig[cond]),
     y = c("password", "admin"))
 
+  # Remove moderator if it is not used
+  if (!auth$table_cofig$moderator$use_moderatior) {
+    changeable_columns = changeable_columns[changeable_columns != "moderator"]
+  }
+
   # // TODO change this to something less awfull
   for (col_name in changeable_columns) {
     # Make nice injection proof queury

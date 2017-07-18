@@ -7,10 +7,12 @@ allos the user to change there password.  Or an andmin to change the user passwo
 any user.}
 \usage{
 password_change_manager(input, output, session, auth, admin = FALSE,
-  user_id = NULL, old_password = NULL)
+  user_id = NULL, old_password = NULL, message = NULL)
 }
 \arguments{
 \item{admin}{Is true if this is an admin changin the datils for another user}
+
+\item{message}{Optional message to show in the password modal}
 }
 \description{
 This function creates and manages the life cycle of a uniqe password_change_modal that

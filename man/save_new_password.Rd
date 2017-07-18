@@ -4,7 +4,10 @@
 \alias{save_new_password}
 \title{Save a new password to the db}
 \usage{
-save_new_password(session, auth, user_id, new_password)
+save_new_password(session, auth, user_id, user_changed, new_password)
+}
+\arguments{
+\item{user_changed}{Has the password been changed by the user, or reset by admin}
 }
 \description{
 Save a new password to the db

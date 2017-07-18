@@ -69,17 +69,16 @@ save_new_user = function(input, output, session, auth) {
 
   # All users defult to not being moderators if moderators exist
   if (auth$table_cofig$moderator$use_moderatior) {
-    sql_create_user =
-      paste0(
-        "INSERT INTO Users",
-        " ( user_id, password, admin, moderator, date_created, last_password_change) ",
-        " VALUES ( ?user_id, ?password, ?admin, '0', NOW(), NOW());")
+    sql_create_user = paste0(
+      "INSERT INTO Users ",
+      " ( user_id, password, admin, moderator, date_created, last_password_change, change_password) ",
+      " VALUES ( ?user_id, ?password, ?admin, '0', NOW(), NOW(), 1);")
+
   } else {
-    sql_create_user =
-      paste0(
-        "INSERT INTO Users",
-        " ( user_id, password, admin, date_created, last_password_change) ",
-        " VALUES ( ?user_id, ?password, ?admin, NOW(), NOW());")
+    sql_create_user = paste0(
+      "INSERT INTO Users",
+      " ( user_id, password, admin, date_created, last_password_change, change_password) ",
+      " VALUES ( ?user_id, ?password, ?admin, NOW(), NOW(), 1);")
   }
 
   query_create_user =

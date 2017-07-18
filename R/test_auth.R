@@ -14,7 +14,7 @@ test_auth = function(config_path, user_id = NULL, no_user = FALSE) {
 
   # If this function is being run from shiny-server stop and return an error as this funciton
   # should only be used for testing localy
-  if (serverInfo()$shinyServer) {
+  if (shiny::serverInfo()$shinyServer) {
     stop(paste0(
       "You are using the funciton test_auth on shiny-server, this function is only for testing ",
       " code in a console or IDE."

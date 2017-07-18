@@ -14,8 +14,8 @@ auth_server = function(server, config_path) {
 
   # Check that server contains all of the requiered argumnets
   if (!setequal(
-      x = server_arguments,
-      y = c("input", "output", "session", "auth"))) {
+    x = server_arguments,
+    y = c("input", "output", "session", "auth"))) {
     stop("The argmunts of the given server function are incorrect.",
          "  The arguments of server must be exacly {input, output, session and auth}.")
   }
@@ -62,27 +62,47 @@ auth_server = function(server, config_path) {
         # Get the user from the db
         auth$dt_user = get_dt_user(auth)
 
-        # Create the sidebar
-        auth_sidebar(
-          input, output, session,
-          status = "logged-in")
+        # Check if the users password needs to be changed
+        if (password_change_required(auth)) {
 
-        ### Render the settings tab
-        settings_tab(input, output, session, auth)
+          # Show the change password modal
+          ShinyBasicAuth::password_change_manager(
+            input, output, session, auth,
+            admin        = FALSE,
+            user_id      = auth$dt_user[, users_id],
+            old_password = auth$dt_user[, password],
+            message      = "You must change your password.")
 
-        ### Render the admin tab
-        admin_tab(input, output, session, auth)
+          auth_sidebar(
+            input, output, session,
+            status = "password_changed")
 
-        ### Redner the page body
-        auth_body(input, output, session,
-                  status = "logged-in")
+        } else {# The user can logon
 
-        ### Run the server code
-        server(input, output, session, auth)
+          # Create the sidebar
+          auth_sidebar(
+            input, output, session,
+            status = "logged-in")
 
+          ### Render the settings tab
+          settings_tab(input, output, session, auth)
+
+          ### Render the admin tab
+          admin_tab(input, output, session, auth)
+
+          ### Redner the page body
+          auth_body(input, output, session,
+                    status = "logged-in")
+
+          ### Run the server code
+          server(input, output, session, auth)
+
+        }
 
       } else {
-        stop("There has been quite a major error in the auth")
+        stop(paste0(
+          "There has been quite a major error in the auth"
+        ))
       }
     })
 
@@ -122,6 +142,9 @@ get_dt_user = function(auth) {
   if (shiny::isTruthy(auth$table_cofig$moderator$use_moderatior)) {
     dt_user = dt_user[, moderator := as.logical(moderator)]
   }
+
+  # Make the change_password logical
+  dt_user = dt_user[, change_password := as.logical(change_password)]
 
   return(dt_user)
 }

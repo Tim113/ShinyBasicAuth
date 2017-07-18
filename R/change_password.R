@@ -3,12 +3,14 @@
 #' any user.
 #'
 #' @param admin Is true if this is an admin changin the datils for another user
+#' @param message Optional message to show in the password modal
 #'
 #' @export
 password_change_manager = function(input, output, session, auth,
                                    admin        = FALSE,
                                    user_id      = NULL,
-                                   old_password = NULL){
+                                   old_password = NULL,
+                                   message      = NULL){
   # If user_id has not been given then take it form auth object
   # This must only happen if auth == TRUE, else this will produce an error
   if (!admin) {
@@ -29,10 +31,12 @@ password_change_manager = function(input, output, session, auth,
     gsub('[[:punct:], [:space:]]', '', .)
 
   # Make the password modal
-  password_modal = password_change_modal(input, output, session,
-                                         admin,
-                                         user_id,
-                                         time_stamp)
+  password_modal = password_change_modal(
+    input, output, session,
+    admin,
+    user_id,
+    time_stamp,
+    message)
 
   # Show the modal containg password change options
   shiny::showModal(password_modal)
@@ -63,10 +67,13 @@ password_change_manager = function(input, output, session, auth,
           new_passwords_match &
           input$password_change_confirm &
           password_strong_enough) {
+
         # Save the new password to the db
-        save_new_password(session, auth,
-                          user_id,
-                          sodium::password_store(input$new_password_main))
+        save_new_password(
+          session, auth,
+          user_id,
+          user_changed = TRUE,
+          new_password =  sodium::password_store(input$new_password_main))
 
         # Close the modal dialog box
         shiny::removeModal()
@@ -104,15 +111,19 @@ password_change_manager = function(input, output, session, auth,
       # Check that the conferm password change box has been ticked
       if (input$password_change_confirm) {
         # Save the new password to the db
-        save_new_password(session, auth,
-                          user_id,
-                          sodium::password_store(input$new_password_main))
+        save_new_password(
+          session, auth,
+          user_id,
+          user_changed = FALSE,
+          new_password = sodium::password_store(input$new_password_main))
 
         # Remake the modal to remove the passwords from memory
-        password_modal = password_change_modal(input, output, session,
-                                               admin,
-                                               user_id,
-                                               time_stamp)
+        password_modal = password_change_modal(
+          input, output, session,
+          admin,
+          user_id,
+          time_stamp)
+
         gc()
 
         # Close the modal dialog box
@@ -127,23 +138,37 @@ password_change_manager = function(input, output, session, auth,
 }
 
 #' Save a new password to the db
+#'
+#' @param user_changed Has the password been changed by the user, or reset by admin
 save_new_password = function(session, auth,
                              user_id,
+                             user_changed,
                              new_password) {
+
+  if (user_changed) {
+    # The user has changed there password, so set change_password to 0
+    change_password = 0
+  } else {
+    # The password has been reset by admin so will have to be changed next time the user
+    # access' the sight
+    change_password = 1
+  }
 
   sql_update_password =
     paste0(
       "UPDATE Users",
       " SET password = ?password, ",
-      " last_password_change = NOW() ",
+      " last_password_change = NOW(), ",
+      " change_password = ?change_password ",
       " WHERE ",
       "user_id = ?user_id;"
     )
 
   query_update_password =
     DBI::sqlInterpolate(auth$pool_auth, sql_update_password,
-                        password = new_password,
-                        user_id  = user_id)
+                        password        = new_password,
+                        user_id         = user_id,
+                        change_password = change_password)
 
   DBI::dbGetQuery(auth$pool_auth, query_update_password)#
 
@@ -164,7 +189,8 @@ save_new_password = function(session, auth,
 password_change_modal = function(input, output, session,
                                  admin,
                                  user_id,
-                                 time_stamp){
+                                 time_stamp,
+                                 message = NULL){
 
   # Check to see if this is a password change for the current user
   if (!admin) {
@@ -186,6 +212,11 @@ password_change_modal = function(input, output, session,
       # Body of Modal Window
       shiny::fluidPage(
         shiny::fluidRow(
+
+          if (!is.null(message)) {
+              shiny::p(message)
+          },
+
           shiny::passwordInput(
             inputId = "old_password",
             label   = "Old Password",
@@ -243,3 +274,37 @@ password_change_modal = function(input, output, session,
   }
 
 }
+
+
+#' Check if a given user's password needs changing.  A password need's chaning if either the
+#' change_password var is set to TRUE in dt_user, or if the age of the password exeads the max
+#' allowed age
+#'
+#' @import data.table
+password_change_required = function(auth) {
+
+  # If the change_password flag is true return TRUE
+  if (auth$dt_user[, change_password]) {
+
+    TRUE
+
+    # Check if there is a max password age
+  } else if (is.null(auth$table_cofig$password$max_age_in_days)) {
+
+    FALSE
+
+    # Specal case where there is no limit to password age
+  } else if (auth$table_cofig$password$max_age_in_days == 0 ) {
+
+    FALSE
+
+  } else if (auth$table_cofig$password$max_age_in_days < # max_age < password_age
+             auth$dt_user[, Sys.Date() -  as.Date(last_password_change)]) {
+
+    TRUE
+
+  } else {
+    FALSE
+  }
+}
+
