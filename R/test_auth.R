@@ -62,7 +62,7 @@ test_auth = function(config_path, user_id = NULL, no_user = FALSE) {
 check_user_id = function(auth, user_id) {
 
   # Create qerey to check for users existance
-  sql = "SELECT EXISTS(SELECT * FROM ShinyBasicAuth.Users WHERE user_id = ?user_id);"
+  sql = "SELECT EXISTS(SELECT * FROM Users WHERE user_id = ?user_id);"
 
   # Interpolate user id
   sql = DBI::sqlInterpolate(
