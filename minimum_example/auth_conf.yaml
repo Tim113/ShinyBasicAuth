@@ -20,6 +20,9 @@ table_cofig:
     min_strength: N
   date_created:
   last_password_change:
+  change_password:
+    human_name: Expire Password
+    admin_changeable: TRUE
   admin:
     human_name: Admin
     admin_changeable: TRUE
@@ -27,6 +30,12 @@ table_cofig:
     use_moderatior: FALSE
     human_name: Moderator
     admin_changeable: TRUE
+  words:
+    type: character
+    defult: some words
+  numbers:
+    type: integer
+    defult: 123
 
 first_user:
   user_id: 143400

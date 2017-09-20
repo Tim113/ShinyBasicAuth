@@ -2,11 +2,10 @@
 % Please edit documentation in R/create_user.R
 \name{save_new_user}
 \alias{save_new_user}
-\title{Save a new password to the db}
+\title{Save a new user to the db}
 \usage{
 save_new_user(input, output, session, auth)
 }
 \description{
-Save a new password to the db
+Save a new user to the db
 }
-

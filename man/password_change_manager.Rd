@@ -19,4 +19,3 @@ This function creates and manages the life cycle of a uniqe password_change_moda
 allos the user to change there password.  Or an andmin to change the user passwords for
 any user.
 }
-

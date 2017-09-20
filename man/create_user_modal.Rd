@@ -12,4 +12,3 @@ create_user_modal(input, output, session, time_stamp)
 \description{
 User creation modal
 }
-

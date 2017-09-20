@@ -51,6 +51,9 @@ server_post_auth = function(input, output, session, auth) {
     )
   })
 
+  # Select the histogram tab
+  updateTabItems(session, inputId = "authMenuItems", selected = "histogram")
+
 }
 
 ### Call the sheppey auth server

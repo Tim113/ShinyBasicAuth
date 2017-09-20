@@ -9,4 +9,3 @@ check_user_id(auth, user_id)
 \description{
 Given a user id return TRUE if they exist in the db and FALSE if not
 }
-

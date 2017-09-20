@@ -9,4 +9,3 @@ percent_bar(value, color = "aqua")
 \description{
 Box of 40px hight that shows value as a percent
 }
-

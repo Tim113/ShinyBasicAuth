@@ -12,4 +12,3 @@ make_auth_object(config_path)
 \description{
 Make the auth object from the auth_config file and the connection
 }
-

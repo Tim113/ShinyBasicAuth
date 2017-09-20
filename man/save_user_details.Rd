@@ -12,4 +12,3 @@ save_user_details(input, output, session, auth, permissions, dt_user = NULL)
 \description{
 Save the current user datailes to the db
 }
-

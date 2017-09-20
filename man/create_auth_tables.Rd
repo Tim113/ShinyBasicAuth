@@ -11,4 +11,3 @@ create_auth_tables(auth_config_path)
 Function to create tables for ShinyBasicAuth, this funciton will also chec that the
 auth.config.yaml file contanis the requite information
 }
-

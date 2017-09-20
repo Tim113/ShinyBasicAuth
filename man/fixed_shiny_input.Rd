@@ -9,4 +9,3 @@ fixed_shiny_input(label = NULL, text = NULL)
 \description{
 Defult syling for what was a slect input that another user has changed and saved
 }
-

@@ -9,4 +9,3 @@ admin_tab(input, output, session, auth)
 \description{
 Create the Admin Tab tab
 }
-

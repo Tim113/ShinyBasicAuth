@@ -9,4 +9,3 @@ get_curret_user_ids(auth)
 \description{
 Query the db for the table of all of the user information
 }
-

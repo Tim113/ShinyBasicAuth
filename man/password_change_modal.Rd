@@ -17,4 +17,3 @@ Password Reset/Change modal ui box
 The UI shown depends on if this is for the logged inuser or an admin
 changeing the passowrd of anothe user
 }
-

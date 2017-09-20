@@ -9,4 +9,3 @@ user_creation_manager(input, output, session, auth)
 \description{
 This funciton allows an admin to create a new user of the app
 }
-

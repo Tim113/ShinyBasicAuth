@@ -9,4 +9,3 @@ message_modal(input, output, session, title, message)
 \description{
 Show a message to the user, without custom javascript
 }
-

@@ -12,4 +12,3 @@ auth_sidebar(input, output, session, status)
 \description{
 Create the sidbar for the dashboard, diffrent dependent upon the status of the app
 }
-

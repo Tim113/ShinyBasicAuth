@@ -22,4 +22,3 @@ To this end the funciton can  create an auth object of either no-login or the lo
 user.  However, the defult behavoir of the function is create auth for the 'first_user' given
 in the config file
 }
-

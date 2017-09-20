@@ -64,28 +64,45 @@ user_creation_manager = function(input, output, session, auth){
     })
 }
 
-#' Save a new password to the db
+#' Save a new user to the db
 save_new_user = function(input, output, session, auth) {
+
+  ### Get the user cration defults
+  # Return a named list of user defults
+  ls_defaults = list_defults(auth)
 
   # All users defult to not being moderators if moderators exist
   if (auth$table_cofig$moderator$use_moderatior) {
     sql_create_user = paste0(
       "INSERT INTO Users ",
-      " ( user_id, password, admin, moderator, date_created, last_password_change, change_password) ",
-      " VALUES ( ?user_id, ?password, ?admin, '0', NOW(), NOW(), 1);")
+      " ( user_id, password, admin, moderator, date_created, last_password_change, change_password, " ,
+      paste0(names(ls_defaults), collapse = ", "),
+      ") ",
+      " VALUES ( ?user_id, ?password, ?admin, '0', NOW(), NOW(), '1',  ",
+      paste0("?", names(ls_defaults), collapse = ", "),
+      " );")
 
   } else {
     sql_create_user = paste0(
-      "INSERT INTO Users",
-      " ( user_id, password, admin, date_created, last_password_change, change_password) ",
-      " VALUES ( ?user_id, ?password, ?admin, NOW(), NOW(), 1);")
+      "INSERT INTO Users ",
+      " ( user_id, password, admin, date_created, last_password_change, change_password, " ,
+      paste0(names(ls_defaults), collapse = ", "),
+      ") ",
+      " VALUES ( ?user_id, ?password, ?admin, NOW(), NOW(), '1',  ",
+      paste0("?", names(ls_defaults), collapse = ", "),
+      " );")
   }
 
-  query_create_user =
-    DBI::sqlInterpolate(auth$pool_auth, sql_create_user,
-                        user_id      = input$user_id,
-                        password     = sodium::password_store(input$password),
-                        admin        = as.numeric(input$make_admin))
+  query_create_user = do.call(
+    DBI::sqlInterpolate,
+    c(
+      auth$pool_auth, sql_create_user,
+      user_id      = input$user_id,
+      password     = sodium::password_store(input$password),
+      admin        = as.numeric(input$make_admin),
+      ls_defaults
+    )
+  )
 
   DBI::dbGetQuery(auth$pool_auth, query_create_user)
 
@@ -172,4 +189,42 @@ get_curret_user_ids = function(auth) {
 
   # Return the query results as a data.table
   return(unlist(dt_res[])) # call [.data.table to force evaluation
+}
+
+#' Given an auth object create a list of the defult values
+list_defults = function(auth) {
+
+  # Extract a list of the defult valeues
+  defults = lapply(
+    X   = names(auth$table_cofig),
+    FUN = function(var_name) {
+
+      defult_val = auth$table_cofig[[var_name]]$defult
+
+      if (!is.null(defult_val)) {
+        defult_val
+      }
+
+    })
+
+  # Remove the NULL values
+  defults[sapply(defults, is.null)] = NULL
+
+  # Extract the names of the varaibles that have defults
+  defults_names = lapply(
+    X   = names(auth$table_cofig),
+    FUN = function(var_name) {
+
+      defult_val = auth$table_cofig[[var_name]]$defult
+
+      if (!is.null(defult_val)) {
+        var_name
+      }
+    }) %>% unlist()
+
+
+  # Set the names of the defults
+  names(defults) = defults_names
+
+  defults
 }

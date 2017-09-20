@@ -13,4 +13,3 @@ Check if a given user's password needs changing.  A password need's chaning if e
 change_password var is set to TRUE in dt_user, or if the age of the password exeads the max
 allowed age
 }
-

@@ -9,4 +9,3 @@ get_users_table(input, output, session, auth)
 \description{
 Query the db for the table of all of the user information
 }
-

@@ -9,4 +9,3 @@ change_user_password(input, output, session, auth, dt_users)
 \description{
 Chagne users password
 }
-

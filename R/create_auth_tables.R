@@ -18,8 +18,7 @@ create_auth_tables = function(auth_config_path) {
     "last_password_change",
     "change_password",
     "admin",
-    "moderator"
-  )
+    "moderator")
 
   # Stop the funciton if not all of the columns are present
   if (!all(required_columns %in% names(auth_config$table_cofig))) {
@@ -47,6 +46,16 @@ create_auth_tables = function(auth_config_path) {
     stop("No user id has been given for the first user.")
   } else if (is.null(auth_config$first_user$password)) {
     stop("No password has been given for the first user.")
+  }
+
+  # Check that no deults have been given for anything other than custom columns
+  # if there has been return an error
+  for (col_name in required_columns) {
+    if (!is.null(auth_config$table_cofig[[col_name]]$defult)) {
+      stop(paste0(
+        "A defult value has been given for ", col_name, ".  Please remove this from the config file."
+      ))
+    }
   }
 
   #################### Requiered Columns ##########
@@ -101,28 +110,8 @@ create_auth_tables = function(auth_config_path) {
 
     ### Users Moderatior
     # make the users_moderator column
-    model_Users[, users_moderator := character()]
-
-    # They type of column for users_modeator must be the same as user_id
-    if (auth_config$table_cofig$user_id$type == "integer") {
-
-      model_Users[, users_moderator := integer()]
-
-    } else if (auth_config$table_cofig$user_id$type == "numeric") {
-
-      model_Users[, users_moderator := numeric()]
-
-    } else if (auth_config$table_cofig$user_id$type == "character") {
-
-      model_Users[, users_moderator := character()]
-
-    } else {
-      # The user_id column is not of a valid form
-      stop(paste0(
-        "The type fo the user_id column has been given as ",
-        auth_config$table_cofig$user_id$type,
-        ".  Howerver user_id must be one of integer, numeric, character"))
-    }
+    # The type of column for users_modeator must be the same as user_id
+    model_Users[, users_moderator := user_id]
   }
 
   #################### Additonal Columns ##########
@@ -202,41 +191,43 @@ create_auth_tables = function(auth_config_path) {
   DBI::dbGetQuery(con, create_query_Users)
 
   #################### Make first user ##########
-  # Set the name
-  dt_first_user = data.table::data.table(
-    user_id = auth_config$first_user$user_id)
+  ### Get the user cration defults
+  # Return a named list of user defults
+  ls_defaults = list_defults(auth)
 
-  # Set the password
-  dt_first_user[, password := sodium::password_store(auth_config$first_user$password)]
+  # All users defult to not being moderators if moderators exist
+  if (auth$table_cofig$moderator$use_moderatior) {
+    sql_create_user = paste0(
+      "INSERT INTO Users ",
+      " ( user_id, password, admin, moderator, date_created, last_password_change, change_password, " ,
+      paste0(names(ls_defaults), collapse = ", "),
+      ") ",
+      " VALUES ( ?user_id, ?password, '1', '0', NOW(), NOW(), '1',  ",
+      paste0("?", names(ls_defaults), collapse = ", "),
+      " );")
 
-  # Set as admin
-  dt_first_user[, admin := 1]
-
-  # Set the time and date of user creation
-  dt_first_user[, c("date_created", "last_password_change") := Sys.time()]
-
-  # Set password_change to 0 i.e. FALSE
-  dt_first_user[, change_password := 0]
-
-  # If using moderators, set the user as not a modorator
-  if (auth_config$table_cofig$moderator$use_moderatior) {
-    dt_first_user[, moderator := 1]
+  } else {
+    sql_create_user = paste0(
+      "INSERT INTO Users ",
+      " ( user_id, password, admin, date_created, last_password_change, change_password, " ,
+      paste0(names(ls_defaults), collapse = ", "),
+      ") ",
+      " VALUES ( ?user_id, ?password, '1', NOW(), NOW(), '1',  ",
+      paste0("?", names(ls_defaults), collapse = ", "),
+      " );")
   }
 
-  # Defult all logical columns to false
-  cond = sapply(auth_config$table_cofig, function(x) {
-    shiny::isTruthy(x$type == "categorical")})
+  query_create_user = do.call(
+    DBI::sqlInterpolate,
+    c(
+      con, sql_create_user,
+      user_id      = auth_config$first_user$user_id,
+      password     = sodium::password_store(auth_config$first_user$password),
+      ls_defaults
+    )
+  )
 
-  # Extract just the chanable columns, excluding those changed via other means
-  logical_cols = setdiff(
-    x = names(auth_config$table_cofig[cond]),
-    y = c("moderator", "admin"))
-
-  for (col_name in logical_cols) {
-    dt_first_user[, (col_name) := 1]
-  }
-
-  dbUpdateTable::dbUpdateTable(con = con, name = "Users", dt = dt_first_user)
+  DBI::dbGetQuery(con, query_create_user)
 
   # Kill the connection
   RMySQL::dbDisconnect(con)

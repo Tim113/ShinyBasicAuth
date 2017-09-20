@@ -14,4 +14,3 @@ auth_server(server, config_path)
 \description{
 Manage the logon, and the changes of the UI based upon
 }
-

@@ -14,4 +14,3 @@ auth_body(input, output, session, status)
 Create the body for the auth part of the dashboard
 This will differ diffrent dependent upon the status of the app
 }
-
