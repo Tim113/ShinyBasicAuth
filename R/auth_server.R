@@ -106,17 +106,6 @@ auth_server = function(server, config_path) {
       }
     })
 
-    # # If logout reset the sidbar, and remove the body
-    # shiny::observeEvent(input$logout, {
-    #
-    #   ### Create the sidebar, with no-user logged in
-    #   create_dashboard_sidebar(input, output, session,
-    #                            competencies,
-    #                            status       = "blank")
-    #
-    #   # Remove any dashoard body there has been
-    #   output$body = shiny::h
-    # })
   })
 }
 

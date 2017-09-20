@@ -65,7 +65,8 @@ auth_sidebar = function(input, output, session, status){
           inputId = "login",
           label   = "Login",
           width   = "100%",
-          icon    = shiny::icon("sign-in")),
+          icon    = shiny::icon("sign-in"),
+          style   = "margin: 6px 5px 6px 0;"),
 
         if (status == "failed") {
           # Dispaly error message
